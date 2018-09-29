@@ -1,0 +1,181 @@
+<crmTable>
+    <input type="button" value="Add entry" onClick="{addEntry}" />
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Project Tag</th>
+                <th scope="col">Deadline</th>
+                <th scope="col">Vendor</th>
+                <th scope="col">Call 0</th>
+                <th scope="col">Bidding</th>
+                <th scope="col">Calls</th>
+                <th scope="col">Needs Follow Up</th>
+                <th scope="col">Bidded</th>
+                <th scope="col">Note</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr each={ item in opts.items }>
+                <td>{item.id}</td>
+                <td>
+                    <tagInput tags={item.tags}/>
+                </td>
+                <td>
+                    <input onChange="{updateValue(item, 'deadline')}" ref="date" value="{item.deadline}" />
+                </td>
+                <td style="width:100px">
+                    <input onChange="{updateValue(item.vendor, 'name')}" ref="vendorName" placeholder="Vendor Name" value={item.vendor.name}
+                    />
+                    <input onChange="{updateValue(item.vendor, 'phone')}" ref="vendorPhone" placeholder="Phone number" value={item.vendor.phone}
+                    />
+                    <input onChange="{updateValue(item.vendor, 'contactName')}" placeholder="Contract Name" value={item.vendor.contactName} />
+                    <input onChange="{updateValue(item.vendor, 'email')}" placeholder="Email" value={item.vendor.email} />
+                </td>
+                <td style="width:100px">
+                    <input onChange="{updateValue(item.call0, 'date')}" ref="date" placeholder="Call0 Name" value={item.call0.date} />
+                    <input onChange="{updateValue(item.call0, 'time')}" type="time" placeholder="Call0 Time" value={item.call0.time} />
+                    <textarea onChange="{updateValue(item.call0, 'note')}" placeholder="Call0 Note" value={item.call0.note} />
+                </td>
+                <td>
+                    <center> <input onChange="{updateValue(item, 'bidding')}" type="checkbox" checked="{item.bidding}" </center>
+                </td>
+
+                <td>
+                    <callColumn calls="{item.calls}" />
+                </td>
+                <td>
+                    <center> <input onchange="{updateValue}" type="checkbox" checked="{item.needsFollowUp}" </center>
+                </td>
+                <td>
+                    <center> <input onchange="{updateValue}" type="checkbox" checked="{item.bidded}" </center>
+                </td>
+                <td>
+                    <textarea onchange="{updateValue}" value="{item.note}" />
+                </td>
+
+
+                <script>
+
+                    this.on('mount', function () {
+                        $(this.refs.date).datepicker({
+                            onSelect: function (data) {
+                                $(this).get(0).dispatchEvent(new Event('change'));
+                            }
+                        });
+                    });
+
+                    updateValue(a, b){
+                        return function (event, c) {
+                            a[b] = event.target.value;
+                        }
+                    }
+                </script>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        addEntry(){
+            var defaultItem = {
+                id: 0,
+                tags: [],
+                deadline: "",
+                vendor: {
+                    name: "",
+                    phone: "",
+                    contactName: "",
+                    email: ""
+                },
+                call0: {
+                    date: "",
+                    time: "",
+                    note: ""
+                },
+                bidding: true,
+                bidded: false,
+                needsFollowUp: false,
+                calls: [
+                    { date: "", time: "", note: "" },
+                ],
+                note: ""
+            };
+            opts.items.push(defaultItem);
+        }
+    </script>
+</crmTable>
+
+
+<tagInput>
+    <ul width="150px">
+        <li style="display: inline-block;" each={tag in opts.tags}>
+            <tag val={ tag} remove={ ()=> remove(tag)} />
+        </li>
+    </ul>
+    <input ref="inputTags" ref="input" />
+    <input type="button" onClick={ add } value="ADD" />
+
+    <script>
+        add(){
+            var tag = this.refs.inputTags.value;
+            if (tag != "" && this.opts.tags.indexOf(tag) == -1)
+                opts.tags.push(tag);
+        }
+        remove(a){
+            opts.tags.pop(a);
+            this.update();
+        }
+
+
+        this.on("mount", () => {
+            $(this.refs.inputTags).autocomplete({
+                source: getTags()
+            });
+        })
+    </script>
+</tagInput>
+
+<tag>
+    <span>{opts.val}</span>
+    <input type="button" value="X" onClick={opts.remove} />
+</tag>
+
+<callColumn>
+    <ul style="width:400px;height:100px;overflow: scroll;">
+        <li each={call in opts.calls}>
+            <call val="{call}" remove="{()=>remove(call)}" />
+        </li>
+    </ul>
+    <input type="button" onClick="{addCall}" value="Add call">
+    <script>
+        addCall(){
+            opts.calls.push({});
+        }
+        remove(call){
+            opts.calls.pop(call);
+            this.update();
+        }
+    </script>
+</callColumn>
+
+<call>
+    <input onChange="{updateValue(opts.val, 'date')}" ref="date" placeholder="Date" value="{this.opts.val.date}" />
+    <input onChange="{updateValue(opts.val, 'time')}" type="time" placeholder="Time" value="{this.opts.val.time}" />
+    <textarea onChange="{updateValue(opts.val, 'note')}" placeholder="Note" value="{this.opts.val.note}" />
+    <input type="button" value="Delete Call" onclick="{opts.remove}" />
+    <script>
+        this.on('mount', function () {
+            $(this.refs.date).datepicker({
+                onSelect: function (data) {
+                    $(this).get(0).dispatchEvent(new Event('change'));
+                }
+            });
+        });
+
+        updateValue(a, b){
+            return function (event, c) {
+                a[b] = event.target.value;
+            }
+        }
+    </script>
+</call>
