@@ -1,11 +1,78 @@
 <crmTable>
     <input type="button" value="Add entry" onClick="{addEntry}" />
+    <span>Tags</span>
+    <select ref="tagFilter" id="tagFilter" multiple="multiple" onchange="{filter}">
+        <option each={ tag in getTags()}>{tag}</option>
+    </select>
+    <span>Deadlines</span>
+    <select ref="deadLineFilter" id="deadLineFilter" multiple="multiple" onchange="{filter}">
+        <option each={ deadline in getDeadLines() }>{deadline}</option>
+    </select>
+
+    <script>
+        this.filter = (e) => {
+            var tags = $("#tagFilter").val();
+            var deadlines = $("#deadLineFilter").val();
+
+            opts.items = opts.items.forEach(e => e.visible = true);
+            if (tags.length == 0 && deadlines.length == 0) {
+                return;
+            }
+
+            if (tags.length != 0) {
+                items.forEach(e => {
+                    if (e.tags.some(t => tags.indexOf(t.name) >= 0) || e.tags.length == 0)
+                        e.visible = true;
+                    else
+                        e.visible = false;
+                })
+            }
+
+            if (deadlines.length != 0) {
+                items.forEach(e => {
+                    if (e.tags.length == 0)
+                        e.visible = true;
+                    else if(e.tags.some(t => tags.some(t2 => deadlines.indexOf(t2) >= 0) == -1))
+                        e.visible = false;
+                })
+            }
+            this.update();
+        }
+
+         addEntry(){
+            var defaultItem = {
+                id: getId(),
+                tags: [],
+                deadline: "",
+                vendor: {
+                    name: "",
+                    phone: "",
+                    contactName: "",
+                    email: ""
+                },
+                call0: {
+                    date: "",
+                    time: "",
+                    note: ""
+                },
+                bidding: true,
+                bidded: false,
+                needsFollowUp: false,
+                calls: [
+                    { date: "", time: "", note: "" },
+                ],
+                note: "",
+                visible:true
+            };
+            opts.items.push(defaultItem);
+        }
+
+    </script>
     <table class="table">
         <thead>
             <tr>
                 <th scope="col">ID</th>
                 <th scope="col">Project Tag</th>
-                <th scope="col">Deadline</th>
                 <th scope="col">Vendor</th>
                 <th scope="col">Call 0</th>
                 <th scope="col">Bidding</th>
@@ -16,13 +83,10 @@
             </tr>
         </thead>
         <tbody>
-            <tr each={ item in opts.items }>
+            <tr each={ item in opts.items } if={item.visible}>
                 <td>{item.id}</td>
                 <td>
                     <tagInput tags={item.tags}/>
-                </td>
-                <td>
-                    <input onChange="{updateValue(item, 'deadline')}" ref="date" value="{item.deadline}" />
                 </td>
                 <td style="width:100px">
                     <input onChange="{updateValue(item.vendor, 'name')}" ref="vendorName" placeholder="Vendor Name" value={item.vendor.name}
@@ -54,55 +118,18 @@
                     <textarea onchange="{updateValue}" value="{item.note}" />
                 </td>
 
-
                 <script>
-
-                    this.on('mount', function () {
-                        $(this.refs.date).datepicker({
-                            onSelect: function (data) {
-                                $(this).get(0).dispatchEvent(new Event('change'));
-                            }
-                        });
-                    });
-
                     updateValue(a, b){
                         return function (event, c) {
                             a[b] = event.target.value;
+                            saveItems();
                         }
                     }
+
                 </script>
             </tr>
         </tbody>
     </table>
-
-    <script>
-        addEntry(){
-            var defaultItem = {
-                id: 0,
-                tags: [],
-                deadline: "",
-                vendor: {
-                    name: "",
-                    phone: "",
-                    contactName: "",
-                    email: ""
-                },
-                call0: {
-                    date: "",
-                    time: "",
-                    note: ""
-                },
-                bidding: true,
-                bidded: false,
-                needsFollowUp: false,
-                calls: [
-                    { date: "", time: "", note: "" },
-                ],
-                note: ""
-            };
-            opts.items.push(defaultItem);
-        }
-    </script>
 </crmTable>
 
 
@@ -112,31 +139,42 @@
             <tag val={ tag} remove={ ()=> remove(tag)} />
         </li>
     </ul>
-    <input ref="inputTags" ref="input" />
-    <input type="button" onClick={ add } value="ADD" />
+    <input ref="inputTagName" placeholder="Tag Name" ref="input" />
+    <input ref="inputTagDeadLine" placeholder="Tag Deadline" ref="input" />
+    <center><input type="button" onClick={ add } value="ADD" /></center>
 
     <script>
         add(){
-            var tag = this.refs.inputTags.value;
-            if (tag != "" && this.opts.tags.indexOf(tag) == -1)
-                opts.tags.push(tag);
+            var tagName = this.refs.inputTagName.value;
+            var tagDeadline = this.refs.inputTagDeadLine.value;
+            if (tagName != "" && this.opts.tags.map(t => t.name).indexOf(tagName) == -1)
+                opts.tags.push({ name: tagName, deadline: tagDeadline, href: "" });
+            else
+                alert("Tag already exists");
+            this.update();
         }
         remove(a){
             opts.tags.pop(a);
             this.update();
         }
 
-
         this.on("mount", () => {
             $(this.refs.inputTags).autocomplete({
                 source: getTags()
             });
+
+            $(this.refs.inputTagDeadLine).datepicker();
+        })
+
+        this.on("update", () => {
+            saveItems();
+            $(this.refs.inputTagDeadLine).datepicker();
         })
     </script>
 </tagInput>
 
 <tag>
-    <span>{opts.val}</span>
+    <span>{opts.val.name}</span>|<span>{opts.val.deadline}</span>
     <input type="button" value="X" onClick={opts.remove} />
 </tag>
 
@@ -150,11 +188,16 @@
     <script>
         addCall(){
             opts.calls.push({});
+            this.update();
         }
         remove(call){
             opts.calls.pop(call);
             this.update();
         }
+
+        this.on("update", () => {
+            saveItems();
+        })
     </script>
 </callColumn>
 
@@ -175,6 +218,7 @@
         updateValue(a, b){
             return function (event, c) {
                 a[b] = event.target.value;
+                saveItems();
             }
         }
     </script>

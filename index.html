@@ -14,7 +14,11 @@
     items = [
         {
             id: 0,
-            tags: ["tag1", "tag2", "tag3"],
+            tags: [
+                { name: "tag1", deadline: "02/02/2018", href: "google.ro" },
+                { name: "tag2", deadline: "02/02/2018", href: "google.ro" },
+                { name: "tag3", deadline: "02/02/2018", href: "google.ro" }
+            ],
             deadline: "01/01/2019",
             vendor: {
                 name: "Test",
@@ -29,16 +33,21 @@
             },
             bidding: true,
             bidded: false,
-            needsFollowUp:false,
+            needsFollowUp: false,
             calls: [
                 { date: "01/01/02", time: "00:00", node: "first call" },
                 { date: "01/01/02", time: "00:00", node: "first call" }
             ],
-            note: "test note"
+            note: "test note",
+            visible: true
         },
         {
             id: 1,
-            tags: ["eeee", "tag2", "tag3"],
+            tags: [
+                { name: "tag4", deadline: "02/02/2018", href: "google.ro" },
+                { name: "tag5", deadline: "02/02/2018", href: "google.ro" },
+                { name: "tag6", deadline: "02/02/2018", href: "google.ro" },
+            ],
             deadline: "01/01/2019",
             vendor: {
                 name: "Test",
@@ -52,13 +61,14 @@
                 note: "note"
             },
             bidding: true,
-            needsFollowUp:false,
+            needsFollowUp: false,
             bidded: false,
             calls: [
                 { date: "01/01/02", time: "00:00", node: "first call" },
                 { date: "01/01/02", time: "00:00", node: "first call" }
             ],
-            note: "test note"
+            note: "test note",
+            visible: true
         }
     ]
 
@@ -71,7 +81,32 @@
 
         return tags.filter(function (item, pos) {
             return tags.indexOf(item) == pos;
+        }).map(tag => tag.name).filter(onlyUnique);
+    }
+
+    function getDeadLines() {
+        var nestedTags = items.map(e => e.tags);
+        var tags = [];
+        nestedTags.forEach(e => {
+            tags = tags.concat(e);
         });
+
+        return tags.filter(function (item, pos) {
+            return tags.indexOf(item) == pos;
+        }).map(tag => tag.deadline).filter(onlyUnique);
+    }
+
+    function onlyUnique(value, index, self) {
+        return self.indexOf(value) === index;
+    }
+
+    function saveItems() {
+        console.log("UPDATED");
+    }
+
+
+    function getId() {
+        return Math.max(...items.map(e => e.id)) + 1;
     }
 </script>
 
