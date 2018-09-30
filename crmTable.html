@@ -65,6 +65,7 @@
                 visible: true
             };
             opts.items.push(defaultItem);
+            saveItems();
         }
         this.on("mount", () => {
             $.post("utils.php", { requestType: "read" }, (data) => {
