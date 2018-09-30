@@ -32,14 +32,14 @@
                 items.forEach(e => {
                     if (e.tags.length == 0)
                         e.visible = true;
-                    else if(e.tags.some(t => tags.some(t2 => deadlines.indexOf(t2) >= 0) == -1))
+                    else if (e.tags.some(t => tags.some(t2 => deadlines.indexOf(t2) >= 0) == -1))
                         e.visible = false;
                 })
             }
             this.update();
         }
 
-         addEntry(){
+        addEntry(){
             var defaultItem = {
                 id: getId(),
                 tags: [],
@@ -62,10 +62,48 @@
                     { date: "", time: "", note: "" },
                 ],
                 note: "",
-                visible:true
+                visible: true
             };
             opts.items.push(defaultItem);
         }
+        this.on("mount", () => {
+            $.post("utils.php", { requestType: "read" }, (data) => {
+                items = JSON.parse(data);
+
+                $.post("utils.php", { requestType: "lastModified" }, (data) => {
+                    lastModified = new Date(data);
+                });
+
+                this.update();
+            });
+
+        })
+        tick() {
+            $.post("utils.php", { requestType: "lastModified" }, (data) => {
+                modifiedDate = new Date(data);
+                if (!(modifiedDate.getTime() === lastModified.getTime())) {
+                    $.post("utils.php", { requestType: "read" }, (data) => {
+                        updatedItems = JSON.parse(data);
+                        for (var i = 0; i < updatedItems.length; i++) {
+                            if (i >= items.length) {
+                                items.push(updatedItems[i]);
+                            }
+                            else {
+                                Object.keys(items[i]).forEach(function (key) {
+                                    items[i][key] = updatedItems[i][key];
+                                });
+                            }
+                        }
+                        console.log("Received changes")
+                        this.update();
+                    });
+                    lastModified = modifiedDate;
+                }
+            });
+            
+        }
+
+        var timer = setInterval(this.tick, 100)
 
     </script>
     <table class="table">
@@ -97,35 +135,49 @@
                     <input onChange="{updateValue(item.vendor, 'email')}" placeholder="Email" value={item.vendor.email} />
                 </td>
                 <td style="width:100px">
-                    <input onChange="{updateValue(item.call0, 'date')}" ref="date" placeholder="Call0 Name" value={item.call0.date} />
+                    <input onChange="{updateValue(item.call0, 'date')}" ref="call0date" placeholder="Call0 Name" value={item.call0.date} />
                     <input onChange="{updateValue(item.call0, 'time')}" type="time" placeholder="Call0 Time" value={item.call0.time} />
                     <textarea onChange="{updateValue(item.call0, 'note')}" placeholder="Call0 Note" value={item.call0.note} />
                 </td>
                 <td>
-                    <center> <input onChange="{updateValue(item, 'bidding')}" type="checkbox" checked="{item.bidding}" </center>
+                    <center> <input onClick="{updateValue(item, 'bidding')}" type="checkbox" checked="{item.bidding}" </center>
                 </td>
 
                 <td>
                     <callColumn calls="{item.calls}" />
                 </td>
                 <td>
-                    <center> <input onchange="{updateValue}" type="checkbox" checked="{item.needsFollowUp}" </center>
+                    <center> <input onClick="{updateValue(item, 'needsFollowUp')}" type="checkbox" checked="{item.needsFollowUp}" </center>
                 </td>
                 <td>
-                    <center> <input onchange="{updateValue}" type="checkbox" checked="{item.bidded}" </center>
+                    <center> <input onClick="{updateValue(item, 'bidded')}"  type="checkbox" checked="{item.bidded}" </center>
                 </td>
                 <td>
-                    <textarea onchange="{updateValue}" value="{item.note}" />
+                    <textarea onchange="{updateValue(item, 'note')}"  value="{item.note}" />
                 </td>
 
                 <script>
                     updateValue(a, b){
                         return function (event, c) {
-                            a[b] = event.target.value;
+                            if(event.target.type=="checkbox"){
+                                a[b] = event.target.checked;
+                            }else{
+                                a[b] = event.target.value;
+                            }
                             saveItems();
                         }
+                        this.update();
                     }
 
+                    this.on("mount", () => {
+                        $(this.refs.date).datepicker();
+                        $(this.refs.call0date).datepicker();
+                    })
+
+                    this.on("update", () => {
+                        $(this.refs.inputTagDeadLine).datepicker();
+                        $(this.refs.call0date).datepicker();
+                    })
                 </script>
             </tr>
         </tbody>
@@ -152,10 +204,12 @@
             else
                 alert("Tag already exists");
             this.update();
+            saveItems();
         }
         remove(a){
             opts.tags.pop(a);
             this.update();
+            saveItems();
         }
 
         this.on("mount", () => {
@@ -167,7 +221,6 @@
         })
 
         this.on("update", () => {
-            saveItems();
             $(this.refs.inputTagDeadLine).datepicker();
         })
     </script>
@@ -189,15 +242,13 @@
         addCall(){
             opts.calls.push({});
             this.update();
+            saveItems();
         }
         remove(call){
             opts.calls.pop(call);
             this.update();
-        }
-
-        this.on("update", () => {
             saveItems();
-        })
+        }
     </script>
 </callColumn>
 
@@ -218,6 +269,7 @@
         updateValue(a, b){
             return function (event, c) {
                 a[b] = event.target.value;
+                this.update();
                 saveItems();
             }
         }
