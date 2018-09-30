@@ -19,5 +19,15 @@ else if($requestType == "lastModified"){
     if (file_exists("records.json")) {
         echo date('D M d Y H:i:s O', filemtime("records.json"));
     }
+}else if($requestType == "getTagHref"){
+    $tagFile = fopen("tags.json", "r") or die("Unable to open file!");
+    $tagFileContent = fread($tagFile,filesize("tags.json"));
+    echo $tagFileContent;
+}else if($requestType == "writeTags"){
+    $tags = $_POST["tags"];
+    $tagsFile = fopen("tags.json", "w") or die("Unable to open file!");
+    
+    fwrite($tagsFile, $tags);
+    fclose($recordsFile);
 }
 ?>

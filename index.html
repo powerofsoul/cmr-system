@@ -12,12 +12,10 @@
 </style>
 <script>
     items = [];
-    lastModified = [];
+    globalTags = [];
+    lastModified = undefined;
     function saveItems(){
-        console.log("update");
-        $.post("utils.php", {requestType:"write", records: JSON.stringify(items)}, (data)=>{
-            console.log(data)
-        });
+        $.post("utils.php", {requestType:"write", records: JSON.stringify(items)});
     }
     function getTags() {
         var nestedTags = items.map(e => e.tags);
@@ -47,8 +45,9 @@
         return self.indexOf(value) === index;
     }
 
-    function getId() {
-        return Math.max(...items.map(e => e.id)) + 1;
+    function getLastId() {
+        if(items.length == 0) return 0;
+        return Math.max(...items.map(e => e.id));
     }
 
 </script>

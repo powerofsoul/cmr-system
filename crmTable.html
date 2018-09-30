@@ -1,5 +1,6 @@
 <crmTable>
     <input type="button" value="Add entry" onClick="{addEntry}" />
+    <input type="button" value="Clear filters" onClick="{clearFilter}" />
     <span>Tags</span>
     <select ref="tagFilter" id="tagFilter" multiple="multiple" onchange="{filter}">
         <option each={ tag in getTags()}>{tag}</option>
@@ -8,40 +9,74 @@
     <select ref="deadLineFilter" id="deadLineFilter" multiple="multiple" onchange="{filter}">
         <option each={ deadline in getDeadLines() }>{deadline}</option>
     </select>
-
+    <span>Show only follow up project</span>
+    <input type="checkbox" onClick={filterFollowUp} />
+    <span>Selected tags</span>
+    <ul>
+        <li each={ tag in globalTags}>
+            <span>Name:{tag.name}</span>
+            Href:<input type="text" name="href" ref="href" value="{tag.href}" onChange="{updateTag(tag, 'href')}">
+        </li>
+    </ul>
     <script>
-        this.filter = (e) => {
+        updateTag(a, b){
+            return function (event, c) {
+                a[b] = event.target.value.trim();
+                $.post("utils.php", { requestType: "writeTags", tags: JSON.stringify(tags) });
+            }
+
+        }
+
+        filter() {
             var tags = $("#tagFilter").val();
-            var deadlines = $("#deadLineFilter").val();
-
-            opts.items = opts.items.forEach(e => e.visible = true);
-            if (tags.length == 0 && deadlines.length == 0) {
-                return;
-            }
-
+            this.globalTags = tags.map(
+                    e => {
+                        if (globalTags.indexOf(e) >= 0)
+                            return { name: e, href: JSON.parse(data).find(d => d.name == e).href };
+                        return { name: e, href: "" }
+                    }
+                )
             if (tags.length != 0) {
-                items.forEach(e => {
-                    if (e.tags.some(t => tags.indexOf(t.name) >= 0) || e.tags.length == 0)
-                        e.visible = true;
-                    else
-                        e.visible = false;
+                items.forEach(el => {
+                    if (el.tags.some(t => tags.indexOf(t.name) >= 0) || el.tags.length == 0)
+                        el.visible = true;
+                     
+                })
+            }
+            var deadlines = $("#deadLineFilter").val();
+            if (deadlines.length != 0) {
+                items.forEach(el => {
+                    if (!el.tags.some(t => deadlines.some(d => new Date(t.deadline) <= new Date(d))))
+                        el.visible = false;
+
                 })
             }
 
-            if (deadlines.length != 0) {
-                items.forEach(e => {
-                    if (e.tags.length == 0)
-                        e.visible = true;
-                    else if (e.tags.some(t => tags.some(t2 => deadlines.indexOf(t2) >= 0) == -1))
-                        e.visible = false;
-                })
-            }
             this.update();
         }
 
+        clearFilter(){
+            items.forEach(element => {
+                element.visible = true;
+            });
+            this.update();
+        }
+
+        filterFollowUp(e){
+            items.forEach(item => {
+                if (e.target.checked == true && item.needsFollowUp == true)
+                    item.visible = true;
+                else if (e.target.checked == true && item.needsFollowUp == false)
+                    item.visible = false;
+                else
+                    item.visible = true;
+            });
+
+            this.update;
+        }
         addEntry(){
             var defaultItem = {
-                id: getId(),
+                id: getLastId(),
                 tags: [],
                 deadline: "",
                 vendor: {
@@ -64,8 +99,12 @@
                 note: "",
                 visible: true
             };
+
+            if (JSON.stringify(opts.items[opts.items.length - 1]) === JSON.stringify(defaultItem)) return;
+            else defaultItem.id++;
             opts.items.push(defaultItem);
             saveItems();
+            this.update();
         }
         this.on("mount", () => {
             $.post("utils.php", { requestType: "read" }, (data) => {
@@ -74,15 +113,17 @@
                 $.post("utils.php", { requestType: "lastModified" }, (data) => {
                     lastModified = new Date(data);
                 });
-
                 this.update();
             });
-
         })
         tick() {
+            $.post("utils.php", { requestType: "getTagHref" }, (data) => {
+                globalTags = JSON.parse(data);
+                this.update();
+            });
             $.post("utils.php", { requestType: "lastModified" }, (data) => {
                 modifiedDate = new Date(data);
-                if (!(modifiedDate.getTime() === lastModified.getTime())) {
+                if (lastModified == undefined || !(modifiedDate.getTime() === lastModified.getTime())) {
                     $.post("utils.php", { requestType: "read" }, (data) => {
                         updatedItems = JSON.parse(data);
                         for (var i = 0; i < updatedItems.length; i++) {
@@ -101,7 +142,7 @@
                     lastModified = modifiedDate;
                 }
             });
-            
+
         }
 
         var timer = setInterval(this.tick, 100)
@@ -148,22 +189,23 @@
                     <callColumn calls="{item.calls}" />
                 </td>
                 <td>
-                    <center> <input onClick="{updateValue(item, 'needsFollowUp')}" type="checkbox" checked="{item.needsFollowUp}" </center>
+                    <center> <input onClick="{updateValue(item, 'needsFollowUp')}" type="checkbox" checked="{item.needsFollowUp}"
+                            </center>
                 </td>
                 <td>
-                    <center> <input onClick="{updateValue(item, 'bidded')}"  type="checkbox" checked="{item.bidded}" </center>
+                    <center> <input onClick="{updateValue(item, 'bidded')}" type="checkbox" checked="{item.bidded}" </center>
                 </td>
                 <td>
-                    <textarea onchange="{updateValue(item, 'note')}"  value="{item.note}" />
+                    <textarea onchange="{updateValue(item, 'note')}" value="{item.note}" />
                 </td>
 
                 <script>
                     updateValue(a, b){
                         return function (event, c) {
-                            if(event.target.type=="checkbox"){
+                            if (event.target.type == "checkbox") {
                                 a[b] = event.target.checked;
-                            }else{
-                                a[b] = event.target.value;
+                            } else {
+                                a[b] = event.target.value.trim();
                             }
                             saveItems();
                         }
@@ -201,7 +243,7 @@
             var tagName = this.refs.inputTagName.value;
             var tagDeadline = this.refs.inputTagDeadLine.value;
             if (tagName != "" && this.opts.tags.map(t => t.name).indexOf(tagName) == -1)
-                opts.tags.push({ name: tagName, deadline: tagDeadline, href: "" });
+                opts.tags.push({ name: tagName, deadline: tagDeadline });
             else
                 alert("Tag already exists");
             this.update();
@@ -269,7 +311,7 @@
 
         updateValue(a, b){
             return function (event, c) {
-                a[b] = event.target.value;
+                a[b] = event.target.value.trim();
                 this.update();
                 saveItems();
             }
