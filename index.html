@@ -12,10 +12,12 @@
 </style>
 <script>
     items = [];
-    globalTags = [];
+    tags = [];
     lastModified = undefined;
     function saveItems(){
-        $.post("utils.php", {requestType:"write", records: JSON.stringify(items)});
+        $.get("utils.php", {requestType:"write", records: JSON.stringify(items), token: new Date().getTime()}, (data)=>{
+            console.log(data);
+        });
     }
     function getTags() {
         var nestedTags = items.map(e => e.tags);

@@ -1,8 +1,7 @@
 <?php
-$requestType = $_POST["requestType"];
+$requestType = $_GET["requestType"];
 if($requestType == "write"){
-    $records = $_POST["records"];
-    echo $records;
+    $records = $_GET["records"];
     $recordsFile = fopen("records.json", "w") or die("Unable to open file!");
     
     fwrite($recordsFile, $records);
@@ -23,11 +22,18 @@ else if($requestType == "lastModified"){
     $tagFile = fopen("tags.json", "r") or die("Unable to open file!");
     $tagFileContent = fread($tagFile,filesize("tags.json"));
     echo $tagFileContent;
-}else if($requestType == "writeTags"){
-    $tags = $_POST["tags"];
-    $tagsFile = fopen("tags.json", "w") or die("Unable to open file!");
+}else if($requestType == "writeTag"){
+    $file = fopen("tags.json", "r") or die("Unable to open file!");
+    $tags =  fread($file, filesize("tags.json"));
+    fclose($file);
+
+    $json = json_decode($tags,true);  
+    $json[$_GET["tagName"]] = $_GET["tagValue"];
+    $json = json_encode($json);
     
-    fwrite($tagsFile, $tags);
-    fclose($recordsFile);
+    $file = fopen("tags.json", "w") or die("Unable to open file!");
+    
+    fwrite($file, $json);
+    fclose($file);
 }
 ?>
