@@ -1,5 +1,6 @@
 <crmTable>
     <input type="button" value="Add entry" onClick="{addEntry}" />
+    <input type="button" value="Add multiple entries" data-toggle="modal" data-target="#addEntriesModal" />
     <input type="button" value="Clear filters" onClick="{clearFilter}" />
     <span>Tags</span>
     <select ref="tagFilter" id="tagFilter" multiple="multiple" onchange="{()=> filter('tag')}">
@@ -121,7 +122,7 @@
         this.on("mount", () => {
             $.get("utils.php", { requestType: "read", token: new Date().getTime() }, (data) => {
                 items = JSON.parse(data);
-                items.forEach(e=> e.visible = true);
+                items.forEach(e => e.visible = true);
 
                 $.get("utils.php", { requestType: "lastModified", token: new Date().getTime() }, (data) => {
                     lastModified = new Date(data);
@@ -145,7 +146,7 @@
                             }
                             else {
                                 var visibility = items[i].visible;
-                                Object.keys(items[i]).forEach(function (key) {                             
+                                Object.keys(items[i]).forEach(function (key) {
                                     items[i][key] = updatedItems[i][key];
                                 });
                                 items[i].visible = visibility;
@@ -174,7 +175,6 @@
                 <th scope="col">Calls</th>
                 <th scope="col">Needs Follow Up</th>
                 <th scope="col">Bidded</th>
-                <th scope="col">Note</th>
             </tr>
         </thead>
         <tbody>
@@ -192,7 +192,7 @@
                     <input onChange="{updateValue(item.vendor, 'email')}" placeholder="Email" value={item.vendor.email} />
                 </td>
                 <td style="width:100px">
-                    <input onChange="{updateValue(item.call0, 'date')}" ref="call0date" placeholder="Call0 Name" value={item.call0.date} />
+                    <input onChange="{updateValue(item.call0, 'date')}" ref="call0date" placeholder="Call0 Date" value={item.call0.date} />
                     <input onChange="{updateValue(item.call0, 'time')}" type="time" placeholder="Call0 Time" value={item.call0.time} />
                     <textarea onChange="{updateValue(item.call0, 'note')}" placeholder="Call0 Note" value={item.call0.note} />
                 </td>
@@ -242,6 +242,103 @@
             </tr>
         </tbody>
     </table>
+
+    <div class="modal" id="addEntriesModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add multiple entries</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Fields:
+                    <select id="fields">
+                        <option value="vendor.name">Vendor Name</option>
+                        <option value="vendor.phone">Vendor Phone Number</option>
+                        <option value="vendor.contactName">Vendor Contact Name</option>
+                        <option value="vendor.email">Vendor Email</option>
+                        <option value="call0.date">Call0 Date</option>
+                        <option value="call0.time">Call0 Time</option>
+                        <option value="call0.note">Call0 Note</option>
+                        <option value="note" >Note</option>
+                    </select>
+                    <input type="button" value="Add" onClick="{addField}" />
+                    <ul>
+                        <li each={field in this.selectedEntryFields}>
+                            {field}
+                            <input type="button" value="X" onClick="{()=> removeField(field)}" />
+                        </li>
+                    </ul>
+                    Values:
+                    <textarea id="inputFields" style="width:100%">
+                    </textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onClick="{import}">Add</button>
+                    <button type="button" class="btn" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        this.selectedEntryFields = [];
+
+        addField(){
+            var selectedField = $("#fields").val();
+            if (this.selectedEntryFields.indexOf(selectedField) == -1)
+                this.selectedEntryFields.push(selectedField);
+        }
+
+        removeField(field){
+            this.selectedEntryFields.pop(field);
+            this.update();
+        }
+
+        import(){
+            var input = $("#inputFields").val();
+            input = input.split("\n").map(i => i.replace(/\s/g, " ").trim().split(" "));
+
+            input.forEach(e => {
+                var defaultItem = {
+                    id: getLastId() + 1,
+                    tags: [],
+                    deadline: "",
+                    vendor: {
+                        name: "",
+                        phone: "",
+                        contactName: "",
+                        email: ""
+                    },
+                    call0: {
+                        date: "",
+                        time: "",
+                        note: ""
+                    },
+                    bidding: true,
+                    bidded: false,
+                    needsFollowUp: false,
+                    calls: [
+                        { date: "", time: "", note: "" },
+                    ],
+                    note: "",
+                    visible: true
+                };
+                for (var i = 0; i < this.selectedEntryFields.length; i++) {
+                    var p = this.selectedEntryFields[i].split(".")[0];
+                    var p2 = this.selectedEntryFields[i].split(".")[1];
+                    defaultItem[p][p2] = e[i];
+                }
+                defaultItem.id = getLastId()+1;
+                items.push(defaultItem);
+               
+            });
+            saveItems();
+        this.update();
+        }
+    </script>
 </crmTable>
 
 
