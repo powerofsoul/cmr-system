@@ -1,1 +1,74 @@
-[{"id":2,"tags":[{"name":"qwe","deadline":"09/04/2018","href":""},{"name":"qw","deadline":"09/12/2018","href":""},{"name":"a","deadline":"09/05/2018","href":""},{"name":"3","deadline":"09/19/2018"}],"deadline":"","vendor":{"name":"12345","phone":"2","contactName":"","email":""},"call0":{"date":"","time":"","note":""},"bidding":true,"bidded":true,"needsFollowUp":false,"calls":[{"date":"10/02/2018","note":"e","time":"02:23"}],"note":"","visible":true},{"id":3,"tags":[{"name":"qwe","deadline":"10/03/2018"}],"deadline":"","vendor":{"name":"","phone":"","contactName":"","email":""},"call0":{"date":"","time":"","note":""},"bidding":true,"bidded":false,"needsFollowUp":true,"calls":[{"date":"","time":"02:00","note":""}],"note":"","visible":true},{"id":4,"tags":[{"name":"test","deadline":"12/05/2017","href":""},{"name":"qwe","deadline":"10/03/2018"}],"deadline":"","vendor":{"name":"","phone":"","contactName":"","email":""},"call0":{"date":"","time":"","note":""},"bidding":true,"bidded":false,"needsFollowUp":false,"calls":[{"date":"","time":"","note":""}],"note":"","visible":true}]
+[
+    {
+        "id": 5,
+        "tags": [
+            {
+                "name": "test",
+                "deadline": "10/18/2018",
+                "href": "http://google.ro"
+            },
+            {
+                "name": "qwe",
+                "deadline": "10/18/2018",
+                "href": "http://google.com"
+            }
+        ],
+        "deadline": "",
+        "vendor": {
+            "name": "",
+            "phone": "",
+            "contactName": "",
+            "email": ""
+        },
+        "call0": {
+            "date": "",
+            "time": "",
+            "note": ""
+        },
+        "bidding": true,
+        "bidded": false,
+        "needsFollowUp": false,
+        "calls": [
+            {
+                "date": "",
+                "time": "",
+                "note": ""
+            }
+        ],
+        "note": "",
+        "visible": true
+    },
+    {
+        "id": 6,
+        "tags": [
+            {
+                "name": "test2",
+                "deadline": ""
+            }
+        ],
+        "deadline": "",
+        "vendor": {
+            "name": "Mobile Steam Boiler Rental Corp.",
+            "phone": "Mt. Vernon New York 10550",
+            "contactName": "",
+            "email": "(718) 384-1110"
+        },
+        "call0": {
+            "date": "",
+            "time": "",
+            "note": ""
+        },
+        "bidding": true,
+        "bidded": false,
+        "needsFollowUp": false,
+        "calls": [
+            {
+                "date": "",
+                "time": "",
+                "note": ""
+            }
+        ],
+        "note": "",
+        "visible": true
+    }
+]

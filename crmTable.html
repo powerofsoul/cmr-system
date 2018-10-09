@@ -1,37 +1,41 @@
 <crmTable>
-    <input type="button" value="Add entry" onClick="{addEntry}" />
-    <input type="button" value="Add multiple entries" data-toggle="modal" data-target="#addEntriesModal" />
-    <input type="button" value="Clear filters" onClick="{clearFilter}" />
-    <span>Tags</span>
-    <select ref="tagFilter" id="tagFilter" multiple="multiple" onchange="{()=> filter('tag')}">
-        <option each={ tag in getTags()}>{tag}</option>
-    </select>
-    <span>Deadlines</span>
-    <select ref="deadLineFilter" id="deadLineFilter" multiple="multiple" onchange="{()=> filter('deadline')}">
-        <option each={ deadline in getDeadLines() }>{deadline}</option>
-    </select>
-    <span>Show only follow up project</span>
-    <input type="checkbox" onClick={filterFollowUp} />
-    <span>Selected tags</span>
-    <ul>
-        <li each={ tag in selectedTags}>
-            <span>Name:{tag.name}</span>
-            Href:
-            <input type="text" name="href" ref="href" value="{tag.href}" onChange="{updateTag(tag, 'href')}">
-        </li>
-    </ul>
+    <div class="fixed-top" style="background-color:#f4f4f4;width: 100%;">
+        <div class="row">
+            <div class="col">
+                Project tag: <input class="form-control" ref="tags" placeholder="Tag Name" ref="input" />
+            </div>
+            <div class="col">
+                Ending Before: <input class="form-control" ref="date" placeholder="Date">
+            </div>
+            <div class="col"></div>
+            <div class="col">
+                Viewing:
+                <select class="custom-select">
+                    <option selected>Overview</option>
+                    <option>CRM</option>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <span>Show only vendors needing follow up</span>
+                <input type="checkbox" onClick={filterFollowUp} />
+            </div>
+            <div class="col">
+                <button type="button" class="btn btn-light" onClick="{addEntry}">Add entry</button>
+                <button type="button" class="btn btn-light" data-toggle="modal" data-target="#addEntriesModal">Add multiple
+                    entries
+                </button>
+            </div>
+            <div class="col">
+                <input type="button" class="btn btn-light" value="Clear filters" onClick="{clearFilter}" />
+            </div>
+            <div class="col"></div>
+            <div class="col"></div>
+        </div>
+    </div>
     <script>
         selectedTags = [];
-        updateTag(a, b){
-            return function (event, c) {
-                $.get("utils.php", { requestType: "writeTag", tagName: a.name, tagValue: event.target.value.trim(), token: new Date().getTime() }, (data) => {
-                    $.get("utils.php", { requestType: "getTagHref", token: new Date().getTime() }, (data) => {
-                        globalTags = JSON.parse(data);
-                        this.update();
-                    });
-                });
-            }
-        }
 
         filter(by) {
             items.forEach(e => {
@@ -129,12 +133,21 @@
                 });
                 this.update();
             });
+
+            $(this.refs.tags).autocomplete({
+                source: getTags()
+            }).focus(function () {
+                $(this).autocomplete('search', $(this).val())
+            });
+        })
+        this.on("update", () => {
+            $(this.refs.tags).autocomplete({
+                source: getTags()
+            }).focus(function () {
+                $(this).autocomplete('search', $(this).val())
+            });
         })
         tick() {
-            $.get("utils.php", { requestType: "getTagHref", token: new Date().getTime() }, (data) => {
-                globalTags = JSON.parse(data);
-                this.update();
-            });
             $.get("utils.php", { requestType: "lastModified", token: new Date().getTime() }, (data) => {
                 modifiedDate = new Date(data);
                 if (lastModified == undefined || !(modifiedDate.getTime() === lastModified.getTime())) {
@@ -143,8 +156,10 @@
                         for (var i = 0; i < updatedItems.length; i++) {
                             if (i >= items.length) {
                                 items.push(updatedItems[i]);
-                            }
-                            else {
+                            } else {
+                                while (updatedItems[i].id != items[i].id) {
+                                    items.splice(i, 1);
+                                }
                                 var visibility = items[i].visible;
                                 Object.keys(items[i]).forEach(function (key) {
                                     items[i][key] = updatedItems[i][key];
@@ -164,13 +179,13 @@
         var timer = setInterval(this.tick, 100)
 
     </script>
-    <table class="table">
+    <table class="table" style="margin-top: 200px">
         <thead>
             <tr>
                 <th scope="col">ID</th>
                 <th scope="col">Project Tag</th>
                 <th scope="col">Vendor</th>
-                <th scope="col">Call 0</th>
+                <th scope="col">Most recent call</th>
                 <th scope="col">Bidding</th>
                 <th scope="col">Calls</th>
                 <th scope="col">Needs Follow Up</th>
@@ -178,23 +193,31 @@
             </tr>
         </thead>
         <tbody>
-            <tr each={ item in opts.items } if={item.visible}>
-                <td>{item.id}</td>
+            <tr each={ item in items } if={item.visible}>
+                <td style="text-align: center">{item.id}
+                    <br>
+                    <input type="button" class="btn btn-danger" value="Delete" onclick="{()=> deleteItem(item)}" /></td>
                 <td>
-                    <tagInput tags={item.tags}/>
+                    <tagInput tags={item.tags} />
+                </td>
+                <td>
+                    <input class="form-control" onChange="{updateValue(item.vendor, 'name')}" ref="vendorName" placeholder="Vendor Name" value={item.vendor.name}
+                    />
+                    <input class="form-control" onChange="{updateValue(item.vendor, 'phone')}" ref="vendorPhone" placeholder="Phone number" value={item.vendor.phone}
+                    />
+                    <input class="form-control" onChange="{updateValue(item.vendor, 'contactName')}" placeholder="Contract Name" value={item.vendor.contactName}
+                    />
+                    <input class="form-control" onChange="{updateValue(item.vendor, 'email')}" placeholder="Email" value={item.vendor.email}
+                    />
                 </td>
                 <td style="width:100px">
-                    <input onChange="{updateValue(item.vendor, 'name')}" ref="vendorName" placeholder="Vendor Name" value={item.vendor.name}
-                    />
-                    <input onChange="{updateValue(item.vendor, 'phone')}" ref="vendorPhone" placeholder="Phone number" value={item.vendor.phone}
-                    />
-                    <input onChange="{updateValue(item.vendor, 'contactName')}" placeholder="Contract Name" value={item.vendor.contactName} />
-                    <input onChange="{updateValue(item.vendor, 'email')}" placeholder="Email" value={item.vendor.email} />
-                </td>
-                <td style="width:100px">
-                    <input onChange="{updateValue(item.call0, 'date')}" ref="call0date" placeholder="Call0 Date" value={item.call0.date} />
-                    <input onChange="{updateValue(item.call0, 'time')}" type="time" placeholder="Call0 Time" value={item.call0.time} />
-                    <textarea onChange="{updateValue(item.call0, 'note')}" placeholder="Call0 Note" value={item.call0.note} />
+                    <input class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'date')}" ref="call0date" placeholder="Date"
+                        value={item.calls[item.calls.length - 1].date} />
+                    <input class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'time')}" type="time" placeholder="Time"
+                        value={item.calls[item.calls.length - 1].time} />
+                    <textarea class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'note')}" placeholder="Note" value={item.calls[item.calls.length
+                        - 1].note} />
+                    <input type="button" onClick="{() => addCall(item)}" value="Add call">
                 </td>
                 <td>
                     <center>
@@ -212,10 +235,6 @@
                     <center>
                         <input onClick="{updateValue(item, 'bidded')}" type="checkbox" checked="{item.bidded}" </center>
                 </td>
-                <td>
-                    <textarea onchange="{updateValue(item, 'note')}" value="{item.note}" />
-                </td>
-
                 <script>
                     updateValue(a, b){
                         return function (event, c) {
@@ -228,15 +247,48 @@
                         }
                         this.update();
                     }
+                    addCall(item){
+                        item.calls.push({ date: "", time: "", note: "" });
+                        this.update();
+                        saveItems();
+                    }
+                    hideItem(item){
+                        item.visible = false;
+                        this.update();
+                    }
+
+                    deleteItem(item){
+                        var index = items.findIndex(x => x.id == item.id);
+                        if (index != -1) {
+                            items.splice(index, 1);
+                        }
+                        saveItems();
+                    }
 
                     this.on("mount", () => {
-                        $(this.refs.date).datepicker();
-                        $(this.refs.call0date).datepicker();
+                        $(this.refs.date).datepicker({
+                            onSelect: function (data) {
+                                $(this).get(0).dispatchEvent(new Event('change'));
+                            }
+                        });
+                        $(this.refs.call0date).datepicker({
+                            onSelect: function (data) {
+                                $(this).get(0).dispatchEvent(new Event('change'));
+                            }
+                        });
                     })
 
                     this.on("update", () => {
-                        $(this.refs.inputTagDeadLine).datepicker();
-                        $(this.refs.call0date).datepicker();
+                        $(this.refs.date).datepicker({
+                            onSelect: function (data) {
+                                $(this).get(0).dispatchEvent(new Event('change'));
+                            }
+                        });
+                        $(this.refs.call0date).datepicker({
+                            onSelect: function (data) {
+                                $(this).get(0).dispatchEvent(new Event('change'));
+                            }
+                        });
                     })
                 </script>
             </tr>
@@ -262,18 +314,17 @@
                         <option value="call0.date">Call0 Date</option>
                         <option value="call0.time">Call0 Time</option>
                         <option value="call0.note">Call0 Note</option>
-                        <option value="note" >Note</option>
+                        <option value="note">Note</option>
                     </select>
                     <input type="button" value="Add" onClick="{addField}" />
                     <ul>
                         <li each={field in this.selectedEntryFields}>
                             {field}
-                            <input type="button" value="X" onClick="{()=> removeField(field)}" />
+                            <input type="button" class="btn btn-light" value="X" onClick="{()=> removeField(field)}" />
                         </li>
                     </ul>
                     Values:
-                    <textarea id="inputFields" style="width:100%">
-                    </textarea>
+                    <textarea class="form-control" id="inputFields" style="width:100%"></textarea>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-dismiss="modal" onClick="{import}">Add</button>
@@ -299,7 +350,7 @@
 
         import(){
             var input = $("#inputFields").val();
-            input = input.split("\n").map(i => i.replace(/\s/g, " ").trim().split(" "));
+            input = input.split("\n").map(i => i.trim("	 ").split("\t")).filter(i => i.length != 0 || i.every(e => e == ""));
 
             input.forEach(e => {
                 var defaultItem = {
@@ -331,28 +382,33 @@
                     var p2 = this.selectedEntryFields[i].split(".")[1];
                     defaultItem[p][p2] = e[i];
                 }
-                defaultItem.id = getLastId()+1;
+                defaultItem.id = getLastId() + 1;
                 items.push(defaultItem);
-               
+
             });
             saveItems();
-        this.update();
+            this.update();
         }
     </script>
 </crmTable>
 
 
 <tagInput>
-    <ul width="150px">
-        <li style="display: inline-block;" each={tag in opts.tags}>
+    <div class="dropdown" style="text-align:center">
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
+            aria-expanded="false">
+            Add tag
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <a class="dropdown-item" href="#">Create New +</a>
+            <a class="dropdown-item" each={tag in getTags()}>{tag}</a>
+        </div>
+    </div>
+    <ul class="list-group list-group-flush" style="max-height: 150px; overflow-y: scroll;" width="150px">
+        <li class="list-group-item" each={tag in opts.tags}>
             <tag val={ tag} remove={ ()=> remove(tag)} />
         </li>
     </ul>
-    <input ref="inputTagName" placeholder="Tag Name" ref="input" />
-    <input ref="inputTagDeadLine" placeholder="Tag Deadline" ref="input" />
-    <center>
-        <input type="button" onClick={ add } value="ADD" />
-    </center>
 
     <script>
         add(){
@@ -366,13 +422,15 @@
             saveItems();
         }
         remove(a){
-            opts.tags.pop(a);
+            var index = opts.tags.findIndex(x => x.name == a.name);
+            if (index > -1)
+                opts.tags.splice(index, 1);
             this.update();
             saveItems();
         }
 
         this.on("mount", () => {
-            $(this.refs.inputTags).autocomplete({
+            $(this.refs.inputTagName).autocomplete({
                 source: getTags()
             });
 
@@ -380,32 +438,32 @@
         })
 
         this.on("update", () => {
+            $(this.refs.inputTagName).autocomplete({
+                source: getTags()
+            });
             $(this.refs.inputTagDeadLine).datepicker();
         })
     </script>
 </tagInput>
 
 <tag>
-    <span>{opts.val.name}</span>|
+    <input class="btn btn-light" type="button" value="X" onClick={opts.remove} />
+    <a href="{opts.val.href}">{opts.val.name}</a>|
     <span>{opts.val.deadline}</span>
-    <input type="button" value="X" onClick={opts.remove} />
 </tag>
 
 <callColumn>
-    <ul style="width:400px;height:100px;overflow: scroll;">
-        <li each={call in opts.calls}>
-            <call val="{call}" remove="{()=>remove(call)}" />
+    <ul class="list-group list-group-flush" style="max-height: 150px; overflow-y: scroll;">
+        <li class="list-group-item" each={call, index in opts.calls}>
+            <call val="{call}" if={index !=opts.calls.length-1} remove="{()=>remove(call)}" />
         </li>
     </ul>
-    <input type="button" onClick="{addCall}" value="Add call">
+
     <script>
-        addCall(){
-            opts.calls.push({});
-            this.update();
-            saveItems();
-        }
         remove(call){
-            opts.calls.pop(call);
+            var index = opts.calls.findIndex(x => x.date == call.date && x.time == call.time && x.note == call.note);
+            if (index > -1)
+                opts.calls.splice(index, 1);
             this.update();
             saveItems();
         }
@@ -413,10 +471,13 @@
 </callColumn>
 
 <call>
-    <input onChange="{updateValue(opts.val, 'date')}" ref="date" placeholder="Date" value="{this.opts.val.date}" />
-    <input onChange="{updateValue(opts.val, 'time')}" type="time" placeholder="Time" value="{this.opts.val.time}" />
-    <textarea onChange="{updateValue(opts.val, 'note')}" placeholder="Note" value="{this.opts.val.note}" />
-    <input type="button" value="Delete Call" onclick="{opts.remove}" />
+    <input class="form-control" onChange="{updateValue(opts.val, 'date')}" ref="date" placeholder="Date" value="{this.opts.val.date}"
+    />
+    <input class="form-control" onChange="{updateValue(opts.val, 'time')}" type="time" placeholder="Time" value="{this.opts.val.time}"
+    />
+    <textarea class="form-control" onChange="{updateValue(opts.val, 'note')}" placeholder="Note" value="{this.opts.val.note}"
+    />
+    <input type="button" class="btn btn-danger" value="Delete Call" onclick="{opts.remove}" />
     <script>
         this.on('mount', function () {
             $(this.refs.date).datepicker({
