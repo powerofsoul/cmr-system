@@ -8,6 +8,7 @@
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <script src="crmTable.html" type="riot/tag"></script>
 <script type="text/javascript" src="https://rawgit.com/riot/riot/master/riot%2Bcompiler.min.js"></script>
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
 
 <style>
     div {
@@ -18,36 +19,16 @@
     }
 </style>
 <script>
-    items = [];
-    tags = [];
-    lastModified = undefined;
+    globalInfo = {tags:[], items: []}
+    lastModified = new Date(0);
     function saveItems(){
-        $.get("utils.php", {requestType:"write", records: JSON.stringify(items), token: new Date().getTime()}, (data)=>{
+        $.get("utils.php", {requestType:"write", records: JSON.stringify(globalInfo), token: new Date().getTime()}, (data)=>{
             console.log(data);
         });
     }
-    function getTags() {
-        var nestedTags = items.map(e => e.tags);
-        var tags = [];
-        nestedTags.forEach(e => {
-            tags = tags.concat(e);
-        });
 
-        return tags.filter(function (item, pos) {
-            return tags.indexOf(item) == pos;
-        }).map(tag => tag.name).filter(onlyUnique);
-    }
-
-    function getDeadLines() {
-        var nestedTags = items.map(e => e.tags);
-        var tags = [];
-        nestedTags.forEach(e => {
-            tags = tags.concat(e);
-        });
-
-        return tags.filter(function (item, pos) {
-            return tags.indexOf(item) == pos;
-        }).map(tag => tag.deadline).filter(onlyUnique);
+    function getTag(i){
+        return globalInfo.tags[i];
     }
 
     function onlyUnique(value, index, self) {
@@ -55,8 +36,8 @@
     }
 
     function getLastId() {
-        if(items.length == 0) return 0;
-        return Math.max(...items.map(e => e.id));
+        if(globalInfo.items.length == 0) return 0;
+        return Math.max(...globalInfo.items.map(e => e.id));
     }
 
 </script>

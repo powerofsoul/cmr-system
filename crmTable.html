@@ -80,7 +80,7 @@
         }
 
         filterFollowUp(e){
-            items.forEach(item => {
+            globalInfo.items.forEach(item => {
                 if (e.target.checked == true && item.needsFollowUp == true)
                     item.visible = true;
                 else if (e.target.checked == true && item.needsFollowUp == false)
@@ -117,32 +117,22 @@
                 visible: true
             };
 
-            if (JSON.stringify(opts.items[opts.items.length - 1]) === JSON.stringify(defaultItem)) return;
+            if (JSON.stringify(globalInfo.items[globalInfo.items.length - 1]) === JSON.stringify(defaultItem)) return;
             else defaultItem.id++;
-            opts.items.push(defaultItem);
+            globalInfo.items.push(defaultItem);
             saveItems();
             this.update();
         }
         this.on("mount", () => {
-            $.get("utils.php", { requestType: "read", token: new Date().getTime() }, (data) => {
-                items = JSON.parse(data);
-                items.forEach(e => e.visible = true);
-
-                $.get("utils.php", { requestType: "lastModified", token: new Date().getTime() }, (data) => {
-                    lastModified = new Date(data);
-                });
-                this.update();
-            });
-
             $(this.refs.tags).autocomplete({
-                source: getTags()
+                source: globalInfo.tags
             }).focus(function () {
                 $(this).autocomplete('search', $(this).val())
             });
         })
         this.on("update", () => {
             $(this.refs.tags).autocomplete({
-                source: getTags()
+                source: globalInfo.tags
             }).focus(function () {
                 $(this).autocomplete('search', $(this).val())
             });
@@ -152,7 +142,10 @@
                 modifiedDate = new Date(data);
                 if (lastModified == undefined || !(modifiedDate.getTime() === lastModified.getTime())) {
                     $.get("utils.php", { requestType: "read", token: new Date().getTime() }, (data) => {
-                        updatedItems = JSON.parse(data);
+                        updatedInfo = JSON.parse(data);
+                        globalInfo.tags = updatedInfo.tags;
+                        updatedItems = updatedInfo.items;
+                        var items = globalInfo.items;
                         for (var i = 0; i < updatedItems.length; i++) {
                             if (i >= items.length) {
                                 items.push(updatedItems[i]);
@@ -193,7 +186,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr each={ item in items } if={item.visible}>
+            <tr each={ item in globalInfo.items } if={item.visible}>
                 <td style="text-align: center">{item.id}
                     <br>
                     <input type="button" class="btn btn-danger" value="Delete" onclick="{()=> deleteItem(item)}" /></td>
@@ -258,9 +251,9 @@
                     }
 
                     deleteItem(item){
-                        var index = items.findIndex(x => x.id == item.id);
+                        var index = globalInfo.items.findIndex(x => x.id == item.id);
                         if (index != -1) {
-                            items.splice(index, 1);
+                            globalInfo.items.splice(index, 1);
                         }
                         saveItems();
                     }
@@ -334,6 +327,28 @@
         </div>
     </div>
 
+    <div id="addEditTag" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input id="addModalName" class="form-control" placeholder="Project Name">
+                    <input id="addModalDeadline" class="form-control" placeholder="Deadline">
+                    <input id="addModalHref" class="form-control" placeholder="HREF">
+                </div>
+                <div class="modal-footer">
+                    <button id="submit" type="button" class="btn btn-primary">Create</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         this.selectedEntryFields = [];
 
@@ -383,7 +398,7 @@
                     defaultItem[p][p2] = e[i];
                 }
                 defaultItem.id = getLastId() + 1;
-                items.push(defaultItem);
+                globalInfo.items.push(defaultItem);
 
             });
             saveItems();
@@ -392,7 +407,6 @@
     </script>
 </crmTable>
 
-
 <tagInput>
     <div class="dropdown" style="text-align:center">
         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
@@ -400,29 +414,36 @@
             Add tag
         </button>
         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-            <a class="dropdown-item" href="#">Create New +</a>
-            <a class="dropdown-item" each={tag in getTags()}>{tag}</a>
+            <a class="dropdown-item" onClick="{createTag}">Create New +</a>
+            <a class="dropdown-item" each={tag, index in globalInfo.tags} onclick="{()=> add(index)}">{tag.name}</a>
         </div>
     </div>
     <ul class="list-group list-group-flush" style="max-height: 150px; overflow-y: scroll;" width="150px">
         <li class="list-group-item" each={tag in opts.tags}>
-            <tag val={ tag} remove={ ()=> remove(tag)} />
+            <tag val={getTag(tag)} remove={ ()=> remove(tag)} />
         </li>
     </ul>
 
     <script>
-        add(){
-            var tagName = this.refs.inputTagName.value;
-            var tagDeadline = this.refs.inputTagDeadLine.value;
-            if (tagName != "" && this.opts.tags.map(t => t.name).indexOf(tagName) == -1)
-                opts.tags.push({ name: tagName, deadline: tagDeadline });
+        add(tagIndex){
+            if (this.opts.tags.indexOf(tagIndex) == -1)
+                opts.tags.push(tagIndex);
             else
                 alert("Tag already exists");
             this.update();
             saveItems();
         }
+        createTag(){
+            $("#addEditTag").modal()
+            $('#addEditTag #submit').attr('onclick',
+                `globalInfo.tags.push({name:$("#addModalName"), 
+                    deadline:$("#addModalDeadline"), 
+                    href:$("#addModalHref")});
+                opts.tags.push(globalInfo.tags.length-1);
+                this.saveItems();`)
+        }
         remove(a){
-            var index = opts.tags.findIndex(x => x.name == a.name);
+            var index = opts.tags.findIndex(x => x == a);
             if (index > -1)
                 opts.tags.splice(index, 1);
             this.update();
@@ -431,7 +452,7 @@
 
         this.on("mount", () => {
             $(this.refs.inputTagName).autocomplete({
-                source: getTags()
+                source: globalInfo.tags
             });
 
             $(this.refs.inputTagDeadLine).datepicker();
@@ -439,7 +460,7 @@
 
         this.on("update", () => {
             $(this.refs.inputTagName).autocomplete({
-                source: getTags()
+                source: globalInfo.tags
             });
             $(this.refs.inputTagDeadLine).datepicker();
         })
@@ -447,6 +468,7 @@
 </tagInput>
 
 <tag>
+    <a class="btn btn-light"><i class="far fa-edit"></i></a>
     <input class="btn btn-light" type="button" value="X" onClick={opts.remove} />
     <a href="{opts.val.href}">{opts.val.name}</a>|
     <span>{opts.val.deadline}</span>
