@@ -2,10 +2,10 @@
     <div class="fixed-top" style="background-color:#f4f4f4;width: 100%;">
         <div class="row">
             <div class="col">
-                Project tag: <input class="form-control" ref="tags" placeholder="Tag Name" ref="input" />
+                Project tag: <input class="form-control" ref="tags" id="tagFilter" placeholder="Tag Name" />
             </div>
             <div class="col">
-                Ending Before: <input class="form-control" ref="date" placeholder="Date">
+                Ending Before: <input class="form-control" ref="date" id="deadlineFilter" placeholder="Date">
             </div>
             <div class="col"></div>
             <div class="col">
@@ -34,144 +34,6 @@
             <div class="col"></div>
         </div>
     </div>
-    <script>
-        selectedTags = [];
-
-        filter(by) {
-            items.forEach(e => {
-                e.visible = true;
-            });
-            if (by == "tag") {
-                var tags = $("#tagFilter").val();
-                selectedTags = tags.map(t => {
-                    var href = globalTags[t];
-                    if (href != undefined) return { name: t, href: href };
-                    return { name: t, href: "" };
-                });
-
-                if (tags.length != 0) {
-                    items.forEach(el => {
-                        if (el.tags.some(t => tags.indexOf(t.name) >= 0))
-                            el.visible = true;
-                        else
-                            el.visible = false;
-
-                    })
-                }
-            } else if (by == "deadline") {
-                var deadlines = $("#deadLineFilter").val();
-                if (deadlines.length != 0) {
-                    items.forEach(el => {
-                        if (!el.tags.some(t => deadlines.some(d => new Date(t.deadline).getTime() === new Date(d).getTime())))
-                            el.visible = false;
-
-                    })
-                }
-            }
-
-            this.update();
-        }
-
-        clearFilter(){
-            items.forEach(element => {
-                element.visible = true;
-            });
-            this.update();
-        }
-
-        filterFollowUp(e){
-            globalInfo.items.forEach(item => {
-                if (e.target.checked == true && item.needsFollowUp == true)
-                    item.visible = true;
-                else if (e.target.checked == true && item.needsFollowUp == false)
-                    item.visible = false;
-                else
-                    item.visible = true;
-            });
-
-            this.update;
-        }
-        addEntry(){
-            var defaultItem = {
-                id: getLastId(),
-                tags: [],
-                deadline: "",
-                vendor: {
-                    name: "",
-                    phone: "",
-                    contactName: "",
-                    email: ""
-                },
-                call0: {
-                    date: "",
-                    time: "",
-                    note: ""
-                },
-                bidding: true,
-                bidded: false,
-                needsFollowUp: false,
-                calls: [
-                    { date: "", time: "", note: "" },
-                ],
-                note: "",
-                visible: true
-            };
-
-            if (JSON.stringify(globalInfo.items[globalInfo.items.length - 1]) === JSON.stringify(defaultItem)) return;
-            else defaultItem.id++;
-            globalInfo.items.push(defaultItem);
-            saveItems();
-            this.update();
-        }
-        this.on("mount", () => {
-            $(this.refs.tags).autocomplete({
-                source: globalInfo.tags
-            }).focus(function () {
-                $(this).autocomplete('search', $(this).val())
-            });
-        })
-        this.on("update", () => {
-            $(this.refs.tags).autocomplete({
-                source: globalInfo.tags
-            }).focus(function () {
-                $(this).autocomplete('search', $(this).val())
-            });
-        })
-        tick() {
-            $.get("utils.php", { requestType: "lastModified", token: new Date().getTime() }, (data) => {
-                modifiedDate = new Date(data);
-                if (lastModified == undefined || !(modifiedDate.getTime() === lastModified.getTime())) {
-                    $.get("utils.php", { requestType: "read", token: new Date().getTime() }, (data) => {
-                        updatedInfo = JSON.parse(data);
-                        globalInfo.tags = updatedInfo.tags;
-                        updatedItems = updatedInfo.items;
-                        var items = globalInfo.items;
-                        for (var i = 0; i < updatedItems.length; i++) {
-                            if (i >= items.length) {
-                                items.push(updatedItems[i]);
-                            } else {
-                                while (updatedItems[i].id != items[i].id) {
-                                    items.splice(i, 1);
-                                }
-                                var visibility = items[i].visible;
-                                Object.keys(items[i]).forEach(function (key) {
-                                    items[i][key] = updatedItems[i][key];
-                                });
-                                items[i].visible = visibility;
-                            }
-                        }
-                        console.log("Received changes")
-                        this.update();
-                    });
-                    lastModified = modifiedDate;
-                }
-            });
-
-        }
-
-        var timer = setInterval(this.tick, 100)
-
-    </script>
     <table class="table" style="margin-top: 200px">
         <thead>
             <tr>
@@ -204,7 +66,7 @@
                     />
                 </td>
                 <td style="width:100px">
-                    <input class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'date')}" ref="call0date" placeholder="Date"
+                    <input class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'date')}" ref="mostRecentCall" placeholder="Date"
                         value={item.calls[item.calls.length - 1].date} />
                     <input class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'time')}" type="time" placeholder="Time"
                         value={item.calls[item.calls.length - 1].time} />
@@ -258,31 +120,160 @@
                         saveItems();
                     }
 
-                    this.on("mount", () => {
-                        $(this.refs.date).datepicker({
-                            onSelect: function (data) {
-                                $(this).get(0).dispatchEvent(new Event('change'));
-                            }
-                        });
-                        $(this.refs.call0date).datepicker({
-                            onSelect: function (data) {
-                                $(this).get(0).dispatchEvent(new Event('change'));
-                            }
-                        });
-                    })
+                    selectedTags = [];
 
-                    this.on("update", () => {
-                        $(this.refs.date).datepicker({
+                    filter(by) {
+                        globalInfo.items.forEach(e => {
+                            e.visible = true;
+                        });
+                        if (by == "tag") {
+                            var tag = $("#tagFilter").val();
+                            if(tag=="") return;
+                            globalInfo.items.forEach(el => {
+                                if (el.tags.find(t => getTag(t).name == tag) != undefined)
+                                    el.visible = true;
+                                else
+                                    el.visible = false;
+                            })
+                        } else if (by == "deadline") {
+                            var deadline = $("#deadlineFilter").val();
+                            globalInfo.items.forEach(el => {
+                                if (!el.tags.some(t =>  new Date(getTag(t).deadline).getTime() >= new Date(deadline).getTime()))
+                                    el.visible = true;
+                                else
+                                    el.visible = false;
+                            })
+                        }
+
+                        this.update();
+                    }
+
+                    clearFilter(){
+                        globalInfo.items.forEach(element => {
+                            element.visible = true;
+                        });
+                        this.update();
+                    }
+
+                    filterFollowUp(e){
+                        globalInfo.items.forEach(item => {
+                            if (e.target.checked == true && item.needsFollowUp == true)
+                                item.visible = true;
+                            else if (e.target.checked == true && item.needsFollowUp == false)
+                                item.visible = false;
+                            else
+                                item.visible = true;
+                        });
+
+                        this.update;
+                    }
+                    addEntry(){
+                        var defaultItem = {
+                            id: getLastId(),
+                            tags: [],
+                            deadline: "",
+                            vendor: {
+                                name: "",
+                                phone: "",
+                                contactName: "",
+                                email: ""
+                            },
+                            bidding: true,
+                            bidded: false,
+                            needsFollowUp: false,
+                            calls: [
+                                { date: "", time: "", note: "" },
+                            ],
+                            note: "",
+                            visible: true
+                        };
+
+                        if (JSON.stringify(globalInfo.items[globalInfo.items.length - 1]) === JSON.stringify(defaultItem)) return;
+                        else defaultItem.id++;
+                        globalInfo.items.push(defaultItem);
+                        saveItems();
+                        this.update();
+                    }
+                    this.on("mount", () => {
+                        $(this.refs.tags).on('keyup', (e) => this.filter('tag'));
+                        $(this.refs.date).on('change', (e) => this.filter('deadline'));
+                        $(this.refs.tags).autocomplete({
+                            source: globalInfo.tags,
+                            minLength: 0,
+                            select: function (a, b) {
+                                $(this).val(b.item.value);
+                                $(this).keyup();
+                            }
+                        }).focus(function () {
+                            $(this).keyup();
+                        });
+
+                        $(this.refs.mostRecentCall).datepicker({
                             onSelect: function (data) {
                                 $(this).get(0).dispatchEvent(new Event('change'));
                             }
                         });
-                        $(this.refs.call0date).datepicker({
+
+                        $(this.refs.date).datepicker({
+                            onSelect: function (data) {
+                                $(this).val(data);
+                                $(this).change();
+                            }
+                        });
+                    })
+                    this.on("update", () => {
+                        $(this.refs.tags).autocomplete({
+                            source: globalInfo.tags.map(x => x.name)
+                        }).focus(function () {
+                            $(this).autocomplete('search', $(this).val())
+                        });
+
+                        $(this.refs.mostRecentCall).datepicker({
                             onSelect: function (data) {
                                 $(this).get(0).dispatchEvent(new Event('change'));
                             }
                         });
                     })
+                    tick() {
+                        $.get("utils.php", { requestType: "lastModified", token: new Date().getTime() }, (data) => {
+                            modifiedDate = new Date(data);
+                            if (lastModified == undefined || !(modifiedDate.getTime() === lastModified.getTime())) {
+                                $.get("utils.php", { requestType: "read", token: new Date().getTime() }, (data) => {
+                                    updatedInfo = JSON.parse(data);
+                                    globalInfo.tags = updatedInfo.tags;
+                                    updatedItems = updatedInfo.items;
+                                    var items = globalInfo.items;
+                                    for (var i = 0; i < updatedItems.length; i++) {
+                                        if (i >= items.length) {
+                                            items.push(updatedItems[i]);
+                                        } else {
+                                            while (updatedItems[i].id != items[i].id) {
+                                                items.splice(i, 1);
+                                            }
+                                            var visibility = items[i].visible;
+                                            Object.keys(items[i]).forEach(function (key) {
+                                                items[i][key] = updatedItems[i][key];
+                                            });
+                                            items[i].visible = visibility;
+                                        }
+                                    }
+                                    console.log("Received changes")
+                                    this.update();
+
+                                    //Dirty trick to trigger datepicker after rendering of page
+                                    $(this.refs.mostRecentCall).datepicker({
+                                        onSelect: function (data) {
+                                            $(this).get(0).dispatchEvent(new Event('change'));
+                                        }
+                                    }); 1
+                                });
+                                lastModified = modifiedDate;
+                            }
+                        });
+
+                    }
+
+                    var timer = setInterval(this.tick, 100)
                 </script>
             </tr>
         </tbody>
