@@ -20,6 +20,8 @@
 </style>
 <script>
     globalInfo = {tags:[], items: []}
+    //TO-DO find alternative to this global used id
+    currentUsedItem = 0;
     lastModified = new Date(0);
     function saveItems(){
         $.get("utils.php", {requestType:"write", records: JSON.stringify(globalInfo), token: new Date().getTime()}, (data)=>{

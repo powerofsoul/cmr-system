@@ -53,7 +53,7 @@
                     <br>
                     <input type="button" class="btn btn-danger" value="Delete" onclick="{()=> deleteItem(item)}" /></td>
                 <td>
-                    <tagInput tags={item.tags} />
+                    <tagInput tags={item.tags} itemId={item.id} />
                 </td>
                 <td>
                     <input class="form-control" onChange="{updateValue(item.vendor, 'name')}" ref="vendorName" placeholder="Vendor Name" value={item.vendor.name}
@@ -128,17 +128,18 @@
                         });
                         if (by == "tag") {
                             var tag = $("#tagFilter").val();
-                            if(tag=="") return;
-                            globalInfo.items.forEach(el => {
-                                if (el.tags.find(t => getTag(t).name == tag) != undefined)
-                                    el.visible = true;
-                                else
-                                    el.visible = false;
-                            })
+                            if (tag != "") {
+                                globalInfo.items.forEach(el => {
+                                    if (el.tags.find(t => getTag(t).name == tag) != undefined)
+                                        el.visible = true;
+                                    else
+                                        el.visible = false;
+                                })
+                            }
                         } else if (by == "deadline") {
                             var deadline = $("#deadlineFilter").val();
                             globalInfo.items.forEach(el => {
-                                if (!el.tags.some(t =>  new Date(getTag(t).deadline).getTime() >= new Date(deadline).getTime()))
+                                if (!el.tags.some(t => new Date(getTag(t).deadline).getTime() >= new Date(deadline).getTime()))
                                     el.visible = true;
                                 else
                                     el.visible = false;
@@ -318,7 +319,7 @@
         </div>
     </div>
 
-    <div id="addEditTag" class="modal" tabindex="-1" role="dialog">
+    <div id="addTagModal" class="modal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -328,12 +329,34 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <input id="addModalName" class="form-control" placeholder="Project Name">
-                    <input id="addModalDeadline" class="form-control" placeholder="Deadline">
-                    <input id="addModalHref" class="form-control" placeholder="HREF">
+                    <input id="addTagModalName" class="form-control" placeholder="Project Name">
+                    <input id="addTagModalDeadline" class="form-control" placeholder="Deadline">
+                    <input id="addTagModalHref" class="form-control" placeholder="HREF">
                 </div>
                 <div class="modal-footer">
-                    <button id="submit" type="button" class="btn btn-primary">Create</button>
+                    <button id="submit" type="button" data-dismiss="modal" class="btn btn-primary" onClick={createTag}>Create</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="editTagModal" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input id="editTagModalName" class="form-control" placeholder="Project Name">
+                    <input id="editTagModalDeadline" class="form-control" placeholder="Deadline">
+                    <input id="editTagModalHref" class="form-control" placeholder="HREF">
+                </div>
+                <div class="modal-footer">
+                    <button id="submit" type="button" data-dismiss="modal" class="btn btn-primary" onClick={editTag}>Edit</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -395,6 +418,26 @@
             saveItems();
             this.update();
         }
+        createTag(){
+            var name = $("#addTagModalName").val();
+            var deadline = $("#addTagModalDeadline").val();
+            var href = $("#addTagModalHref").val();
+            if (href.indexOf("http://") != 0) href = "http://" + href;
+            globalInfo.tags.push({ name: name, deadline: deadline, href: href });
+            var item = globalInfo.items.find(x => x.id == currentUsedItem);
+            item.tags.push(globalInfo.tags.length - 1);
+            saveItems();
+            this.update();
+        }
+        editTag(){
+            var name = $("#editTagModalName").val();
+            var deadline = $("#editTagModalDeadline").val();
+            var href = $("#editTagModalHref").val();
+
+            globalInfo.tags[currentUsedItem] = { name: name, deadline: deadline, href: href };
+            saveItems();
+            this.update();
+        }
     </script>
 </crmTable>
 
@@ -411,7 +454,7 @@
     </div>
     <ul class="list-group list-group-flush" style="max-height: 150px; overflow-y: scroll;" width="150px">
         <li class="list-group-item" each={tag in opts.tags}>
-            <tag val={getTag(tag)} remove={ ()=> remove(tag)} />
+            <tag val={getTag(tag)} index={tag} remove={ ()=> remove(tag)} />
         </li>
     </ul>
 
@@ -425,14 +468,14 @@
             saveItems();
         }
         createTag(){
-            $("#addEditTag").modal()
-            $('#addEditTag #submit').attr('onclick',
-                `globalInfo.tags.push({name:$("#addModalName"), 
-                    deadline:$("#addModalDeadline"), 
-                    href:$("#addModalHref")});
-                opts.tags.push(globalInfo.tags.length-1);
-                this.saveItems();`)
+            $("#addTagModalName").val('');
+            $("#addTagModalDeadline").datepicker();
+            $("#addTagModalDeadline").val('');
+            $("#addTagModalHref").val('');
+            currentUsedItem = index;
+            $("#addTagModal").modal();
         }
+
         remove(a){
             var index = opts.tags.findIndex(x => x == a);
             if (index > -1)
@@ -459,10 +502,22 @@
 </tagInput>
 
 <tag>
-    <a class="btn btn-light"><i class="far fa-edit"></i></a>
+    <button class="btn btn-light" onclick="{editTag}"><i class="far fa-edit"></i></button>
     <input class="btn btn-light" type="button" value="X" onClick={opts.remove} />
     <a href="{opts.val.href}">{opts.val.name}</a>|
     <span>{opts.val.deadline}</span>
+
+    <script>
+        editTag(){
+            var tag = getTag(this.opts.index);
+            $("#editTagModalName").val(tag.name);
+            $("#editTagModalDeadline").datepicker();
+            $('#editTagModalDeadline').datepicker("setDate", new Date(tag.date) );
+            $("#editTagModalHref").val(tag.href);
+            currentUsedItem = this.opts.index;
+            $("#editTagModal").modal();
+        }
+    </script>
 </tag>
 
 <callColumn>
