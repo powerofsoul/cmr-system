@@ -10,9 +10,9 @@
             <div class="col"></div>
             <div class="col">
                 Viewing:
-                <select class="custom-select">
-                    <option selected>Overview</option>
-                    <option>CRM</option>
+                <select class="custom-select" id="viewSelect" onChange={changeView}>
+                    <option selected>CRM</option>
+                    <option>Overview</option>
                 </select>
             </div>
         </div>
@@ -34,7 +34,7 @@
             <div class="col"></div>
         </div>
     </div>
-    <table class="table" style="margin-top: 200px">
+    <table class="table" style="margin-top: 200px" if="{globalView == 0}">
         <thead>
             <tr>
                 <th scope="col">ID</th>
@@ -42,9 +42,10 @@
                 <th scope="col">Vendor</th>
                 <th scope="col">Most recent call</th>
                 <th scope="col">Bidding</th>
-                <th scope="col">Calls</th>
                 <th scope="col">Needs Follow Up</th>
+                <th scope="col">Intends to bid</th>
                 <th scope="col">Bidded</th>
+                <th scope="col">Previous calls</th>
             </tr>
         </thead>
         <tbody>
@@ -78,17 +79,20 @@
                     <center>
                         <input onClick="{updateValue(item, 'bidding')}" type="checkbox" checked="{item.bidding}" </center>
                 </td>
-
-                <td>
-                    <callColumn calls="{item.calls}" />
-                </td>
                 <td>
                     <center>
                         <input onClick="{updateValue(item, 'needsFollowUp')}" type="checkbox" checked="{item.needsFollowUp}" </center>
                 </td>
                 <td>
                     <center>
+                        <input onClick="{updateValue(item, 'intendsToBid')}" type="checkbox" checked="{item.intendsToBid}" </center>
+                </td>
+                <td>
+                    <center>
                         <input onClick="{updateValue(item, 'bidded')}" type="checkbox" checked="{item.bidded}" </center>
+                </td>
+                <td>
+                    <callColumn calls="{item.calls}" />
                 </td>
                 <script>
                     updateValue(a, b){
@@ -273,13 +277,69 @@
                         });
 
                     }
+                    var timer = setInterval(this.tick, 100);
 
-                    var timer = setInterval(this.tick, 100)
+                    changeView(){
+                        var view = $("#viewSelect").val();
+                        switch (view) {
+                            case "CRM":
+                                globalView = 0;
+                                break;
+                            case "Overview":
+                                globalView = 1;
+                                break;
+                        }
+
+                        this.update();
+                    }
                 </script>
             </tr>
         </tbody>
     </table>
 
+
+    <table class="table" style="margin-top: 200px" if="{globalView == 1}">
+        <thead>
+            <tr>
+                <th scope="col">Project Tag</th>
+                <th scope="col">Bids</th>
+                <th scope="col">Intending to bid</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr each={tag in globalInfo.tags}>
+                <td>
+                    <a href="{tag.href}">{tag.name}</a>|
+                    <span>{tag.deadline}</span>
+                </td>
+                <td>
+                    <a>{countBids(tag)}</a>
+                    <input class="form-control" each={vendor in getBids(tag)} value="{vendor.name}">
+                </td>
+                <td>
+                    <a>{countIntentions(tag)}</a>
+                    <input class="form-control" each={vendor in getIntentions(tag)} value="{vendor.name}">
+                </td>
+
+                <script>
+                    countBids(tag){
+                        return globalInfo.items.filter(x => x.tags.find(t => JSON.stringify(getTag(t)) === JSON.stringify(tag) && x.bidded == true) != undefined).length;
+                    }
+                    getBids(tag){
+                        return globalInfo.items.filter(x => x.tags.find(t => JSON.stringify(getTag(t)) === JSON.stringify(tag) && x.bidded == true) != undefined).map(x => x.vendor);
+                    }
+                    countIntentions(tag){
+                        return globalInfo.items.filter(x => x.tags.find(t => JSON.stringify(getTag(t)) === JSON.stringify(tag) && x.intendsToBid == true) != undefined).length;
+                    }
+                    getIntentions(tag){
+                        return globalInfo.items.filter(x => x.tags.find(t => JSON.stringify(getTag(t)) === JSON.stringify(tag) && x.intendsToBid == true) != undefined).map(x => x.vendor);
+                    }
+                </script>
+            </tr>
+        </tbody>
+
+
+    </table>
     <div class="modal" id="addEntriesModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -399,6 +459,7 @@
                     },
                     bidding: true,
                     bidded: false,
+                    intendsToBid:false,
                     needsFollowUp: false,
                     calls: [
                         { date: "", time: "", note: "" },
@@ -472,7 +533,7 @@
             $("#addTagModalDeadline").datepicker();
             $("#addTagModalDeadline").val('');
             $("#addTagModalHref").val('');
-            currentUsedItem = index;
+            currentUsedItem = this.opts.itemid;
             $("#addTagModal").modal();
         }
 
@@ -512,7 +573,7 @@
             var tag = getTag(this.opts.index);
             $("#editTagModalName").val(tag.name);
             $("#editTagModalDeadline").datepicker();
-            $('#editTagModalDeadline').datepicker("setDate", new Date(tag.date) );
+            $('#editTagModalDeadline').datepicker("setDate", new Date(tag.date));
             $("#editTagModalHref").val(tag.href);
             currentUsedItem = this.opts.index;
             $("#editTagModal").modal();
