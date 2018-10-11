@@ -1,37 +1,40 @@
 <crmTable>
-    <div class="fixed-top" style="background-color:#f4f4f4;width: 100%;">
-        <div class="row">
-            <div class="col">
-                Project tag: <input class="form-control" ref="tags" id="tagFilter" placeholder="Tag Name" />
+    <div class="fixed-top" style="background-color:#f4f4f4;">
+        <div class="container-full" style="margin-left:30;margin-right: 30">
+            <div class="row">
+                <div class="col">
+                    Project tag: <input class="form-control" ref="tags" id="tagFilter" placeholder="Tag Name" />
+                </div>
+                <div class="col">
+                    Ending Before: <input class="form-control" ref="date" id="deadlineFilter" placeholder="Date">
+                </div>
+                <div class="col"></div>
+                <div class="col">
+                    Viewing:
+                    <select class="custom-select" id="viewSelect" onChange={changeView}>
+                        <option selected>CRM</option>
+                        <option>Overview</option>
+                    </select>
+                </div>
             </div>
-            <div class="col">
-                Ending Before: <input class="form-control" ref="date" id="deadlineFilter" placeholder="Date">
+            <div class="row">
+                <div class="col">
+                    <span>Show only vendors needing follow up</span>
+                    <input type="checkbox" onClick={filterFollowUp} />
+                </div>
+                <div class="col">
+                    <button type="button" class="btn btn-light" onClick="{addEntry}">Add entry</button>
+                    <button type="button" class="btn btn-light" data-toggle="modal" data-target="#addEntriesModal">Add
+                        multiple
+                        entries
+                    </button>
+                </div>
+                <div class="col">
+                    <input type="button" class="btn btn-light" value="Clear filters" onClick="{clearFilter}" />
+                </div>
+                <div class="col"></div>
+                <div class="col"></div>
             </div>
-            <div class="col"></div>
-            <div class="col">
-                Viewing:
-                <select class="custom-select" id="viewSelect" onChange={changeView}>
-                    <option selected>CRM</option>
-                    <option>Overview</option>
-                </select>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col">
-                <span>Show only vendors needing follow up</span>
-                <input type="checkbox" onClick={filterFollowUp} />
-            </div>
-            <div class="col">
-                <button type="button" class="btn btn-light" onClick="{addEntry}">Add entry</button>
-                <button type="button" class="btn btn-light" data-toggle="modal" data-target="#addEntriesModal">Add multiple
-                    entries
-                </button>
-            </div>
-            <div class="col">
-                <input type="button" class="btn btn-light" value="Clear filters" onClick="{clearFilter}" />
-            </div>
-            <div class="col"></div>
-            <div class="col"></div>
         </div>
     </div>
     <table class="table" style="margin-top: 200px" if="{globalView == 0}">
@@ -56,22 +59,22 @@
                     <tagInput tags={item.tags} itemId={item.id} />
                 </td>
                 <td>
-                    <input class="form-control" onChange="{updateValue(item.vendor, 'name')}" ref="vendorName" placeholder="Vendor Name" value={item.vendor.name}
-                    />
-                    <input class="form-control" onChange="{updateValue(item.vendor, 'phone')}" ref="vendorPhone" placeholder="Phone number" value={item.vendor.phone}
-                    />
-                    <input class="form-control" onChange="{updateValue(item.vendor, 'contactName')}" placeholder="Contract Name" value={item.vendor.contactName}
-                    />
-                    <input class="form-control" onChange="{updateValue(item.vendor, 'email')}" placeholder="Email" value={item.vendor.email}
-                    />
+                    <input class="form-control" onChange="{updateValue(item.vendor, 'name')}" ref="vendorName"
+                        placeholder="Vendor Name" value={item.vendor.name} />
+                    <input class="form-control" onChange="{updateValue(item.vendor, 'phone')}" ref="vendorPhone"
+                        placeholder="Phone number" value={item.vendor.phone} />
+                    <input class="form-control" onChange="{updateValue(item.vendor, 'contactName')}" placeholder="Contract Name"
+                        value={item.vendor.contactName} />
+                    <input class="form-control" onChange="{updateValue(item.vendor, 'email')}" placeholder="Email"
+                        value={item.vendor.email} />
                 </td>
-                <td style="width:100px">
-                    <input class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'date')}" ref="mostRecentCall" placeholder="Date"
-                        value={item.calls[item.calls.length - 1].date} />
-                    <input class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'time')}" type="time" placeholder="Time"
-                        value={item.calls[item.calls.length - 1].time} />
-                    <textarea class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'note')}" placeholder="Note" value={item.calls[item.calls.length
-                        - 1].note} />
+                <td style="width:500px">
+                    <input class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'date')}" ref="mostRecentCall"
+                        placeholder="Date" value={item.calls[item.calls.length - 1].date} />
+                    <input class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'time')}"
+                        type="time" placeholder="Time" value={item.calls[item.calls.length - 1].time} />
+                    <textarea class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'note')}"
+                        placeholder="Note" value={item.calls[item.calls.length - 1].note} />
                     <input type="button" onClick="{() => addCall(item)}" value="Add call">
                 </td>
                 <td>
@@ -86,7 +89,7 @@
                     <center>
                         <input onClick="{updateValue(item, 'bidded')}" type="checkbox" checked="{item.bidded}" </center>
                 </td>
-                <td>
+                <td  style="width:500px">
                     <callColumn calls="{item.calls}" />
                 </td>
                 <script>
@@ -138,7 +141,7 @@
                         } else if (by == "deadline") {
                             var deadline = $("#deadlineFilter").val();
                             globalInfo.items.forEach(el => {
-                                if (!el.tags.some(t => new Date(getTag(t).deadline).getTime() >= new Date(deadline).getTime()))
+                                if (!el.tags.some(t => new Date(getTag(t).deadline).getTime() > new Date(deadline).getTime()))
                                     el.visible = true;
                                 else
                                     el.visible = false;
@@ -152,6 +155,8 @@
                         globalInfo.items.forEach(element => {
                             element.visible = true;
                         });
+                        $(this.refs.date).val("");
+                        $(this.refs.tags).val("");
                         this.update();
                     }
 
@@ -178,7 +183,7 @@
                                 contactName: "",
                                 email: ""
                             },
-                            intendsToBid:false,
+                            intendsToBid: false,
                             bidded: false,
                             needsFollowUp: false,
                             calls: [
@@ -365,141 +370,143 @@
                     </ul>
                     Values:
                     <textarea class="form-control" id="inputFields" style="width:100%"></textarea>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" onClick="{import}">Add</button>
-                    <button type="button" class="btn" data-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal" onClick="{import}">Add</button>
+                        <button type="button" class="btn" data-dismiss="modal">Cancel</button>
+                    </div>
+                    </div>
+                    </div>
+                    </div>
 
-    <div id="addTagModal" class="modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <input id="addTagModalName" class="form-control" placeholder="Project Name">
-                    <input id="addTagModalDeadline" class="form-control" placeholder="Deadline">
-                    <input id="addTagModalHref" class="form-control" placeholder="HREF">
-                </div>
-                <div class="modal-footer">
-                    <button id="submit" type="button" data-dismiss="modal" class="btn btn-primary" onClick={createTag}>Create</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
+                    <div id="addTagModal" class="modal" tabindex="-1" role="dialog">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Add</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <input id="addTagModalName" class="form-control" placeholder="Project Name">
+                                    <input id="addTagModalDeadline" class="form-control" placeholder="Deadline">
+                                    <input id="addTagModalHref" class="form-control" placeholder="HREF">
+                                </div>
+                                <div class="modal-footer">
+                                    <button id="submit" type="button" data-dismiss="modal" class="btn btn-primary"
+                                        onClick={createTag}>Create</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-    <div id="editTagModal" class="modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <input id="editTagModalName" class="form-control" placeholder="Project Name">
-                    <input id="editTagModalDeadline" class="form-control" placeholder="Deadline">
-                    <input id="editTagModalHref" class="form-control" placeholder="HREF">
-                </div>
-                <div class="modal-footer">
-                    <button id="submit" type="button" data-dismiss="modal" class="btn btn-primary" onClick={editTag}>Edit</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
+                    <div id="editTagModal" class="modal" tabindex="-1" role="dialog">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Add</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <input id="editTagModalName" class="form-control" placeholder="Project Name">
+                                    <input id="editTagModalDeadline" class="form-control" placeholder="Deadline">
+                                    <input id="editTagModalHref" class="form-control" placeholder="HREF">
+                                </div>
+                                <div class="modal-footer">
+                                    <button id="submit" type="button" data-dismiss="modal" class="btn btn-primary"
+                                        onClick={editTag}>Edit</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-    <script>
-        this.selectedEntryFields = [];
+                    <script>
+                        this.selectedEntryFields = [];
 
-        addField(){
-            var selectedField = $("#fields").val();
-            if (this.selectedEntryFields.indexOf(selectedField) == -1)
-                this.selectedEntryFields.push(selectedField);
-        }
+                        addField(){
+                            var selectedField = $("#fields").val();
+                            if (this.selectedEntryFields.indexOf(selectedField) == -1)
+                                this.selectedEntryFields.push(selectedField);
+                        }
 
-        removeField(field){
-            this.selectedEntryFields.pop(field);
-            this.update();
-        }
+                        removeField(field){
+                            this.selectedEntryFields.pop(field);
+                            this.update();
+                        }
 
-        import(){
-            var input = $("#inputFields").val();
-            input = input.split("\n").map(i => i.trim("	 ").split("\t")).filter(i => i.length != 0 || i.every(e => e == ""));
+                        import(){
+                            var input = $("#inputFields").val();
+                            input = input.split("\n").map(i => i.trim("	 ").split("\t")).filter(i => i.length != 0 || i.every(e => e == ""));
 
-            input.forEach(e => {
-                var defaultItem = {
-                    id: getLastId() + 1,
-                    tags: [],
-                    deadline: "",
-                    vendor: {
-                        name: "",
-                        phone: "",
-                        contactName: "",
-                        email: ""
-                    },
-                    call0: {
-                        date: "",
-                        time: "",
-                        note: ""
-                    },
-                    bidded: false,
-                    intendsToBid:false,
-                    needsFollowUp: false,
-                    calls: [
-                        { date: "", time: "", note: "" },
-                    ],
-                    note: "",
-                    visible: true
-                };
-                for (var i = 0; i < this.selectedEntryFields.length; i++) {
-                    var p = this.selectedEntryFields[i].split(".")[0];
-                    var p2 = this.selectedEntryFields[i].split(".")[1];
-                    defaultItem[p][p2] = e[i];
-                }
-                defaultItem.id = getLastId() + 1;
-                globalInfo.items.push(defaultItem);
+                            input.forEach(e => {
+                                var defaultItem = {
+                                    id: getLastId() + 1,
+                                    tags: [],
+                                    deadline: "",
+                                    vendor: {
+                                        name: "",
+                                        phone: "",
+                                        contactName: "",
+                                        email: ""
+                                    },
+                                    call0: {
+                                        date: "",
+                                        time: "",
+                                        note: ""
+                                    },
+                                    bidded: false,
+                                    intendsToBid: false,
+                                    needsFollowUp: false,
+                                    calls: [
+                                        { date: "", time: "", note: "" },
+                                    ],
+                                    note: "",
+                                    visible: true
+                                };
+                                for (var i = 0; i < this.selectedEntryFields.length; i++) {
+                                    var p = this.selectedEntryFields[i].split(".")[0];
+                                    var p2 = this.selectedEntryFields[i].split(".")[1];
+                                    defaultItem[p][p2] = e[i];
+                                }
+                                defaultItem.id = getLastId() + 1;
+                                globalInfo.items.push(defaultItem);
 
-            });
-            saveItems();
-            this.update();
-        }
-        createTag(){
-            var name = $("#addTagModalName").val();
-            var deadline = $("#addTagModalDeadline").val();
-            var href = $("#addTagModalHref").val();
-            if (href.indexOf("http://") != 0) href = "http://" + href;
-            globalInfo.tags.push({ name: name, deadline: deadline, href: href });
-            var item = globalInfo.items.find(x => x.id == currentUsedItem);
-            item.tags.push(globalInfo.tags.length - 1);
-            saveItems();
-            this.update();
-        }
-        editTag(){
-            var name = $("#editTagModalName").val();
-            var deadline = $("#editTagModalDeadline").val();
-            var href = $("#editTagModalHref").val();
+                            });
+                            saveItems();
+                            this.update();
+                        }
+                        createTag(){
+                            var name = $("#addTagModalName").val();
+                            var deadline = $("#addTagModalDeadline").val();
+                            var href = $("#addTagModalHref").val();
+                            if (href.indexOf("http://") != 0) href = "http://" + href;
+                            globalInfo.tags.push({ name: name, deadline: deadline, href: href });
+                            var item = globalInfo.items.find(x => x.id == currentUsedItem);
+                            item.tags.push(globalInfo.tags.length - 1);
+                            saveItems();
+                            this.update();
+                        }
+                        editTag(){
+                            var name = $("#editTagModalName").val();
+                            var deadline = $("#editTagModalDeadline").val();
+                            var href = $("#editTagModalHref").val();
 
-            globalInfo.tags[currentUsedItem] = { name: name, deadline: deadline, href: href };
-            saveItems();
-            this.update();
-        }
-    </script>
+                            globalInfo.tags[currentUsedItem] = { name: name, deadline: deadline, href: href };
+                            saveItems();
+                            this.update();
+                        }
+                    </script>
 </crmTable>
 
 <tagInput>
     <div class="dropdown" style="text-align:center">
-        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
-            aria-expanded="false">
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
             Add tag
         </button>
         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
@@ -594,12 +601,9 @@
 </callColumn>
 
 <call>
-    <input class="form-control" onChange="{updateValue(opts.val, 'date')}" ref="date" placeholder="Date" value="{this.opts.val.date}"
-    />
-    <input class="form-control" onChange="{updateValue(opts.val, 'time')}" type="time" placeholder="Time" value="{this.opts.val.time}"
-    />
-    <textarea class="form-control" onChange="{updateValue(opts.val, 'note')}" placeholder="Note" value="{this.opts.val.note}"
-    />
+    <input class="form-control" onChange="{updateValue(opts.val, 'date')}" ref="date" placeholder="Date" value="{this.opts.val.date}" />
+    <input class="form-control" onChange="{updateValue(opts.val, 'time')}" type="time" placeholder="Time" value="{this.opts.val.time}" />
+    <textarea class="form-control" onChange="{updateValue(opts.val, 'note')}" placeholder="Note" value="{this.opts.val.note}" />
     <input type="button" class="btn btn-danger" value="Delete Call" onclick="{opts.remove}" />
     <script>
         this.on('mount', function () {
