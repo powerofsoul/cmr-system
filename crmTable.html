@@ -41,7 +41,6 @@
                 <th scope="col">Project Tag</th>
                 <th scope="col">Vendor</th>
                 <th scope="col">Most recent call</th>
-                <th scope="col">Bidding</th>
                 <th scope="col">Needs Follow Up</th>
                 <th scope="col">Intends to bid</th>
                 <th scope="col">Bidded</th>
@@ -74,10 +73,6 @@
                     <textarea class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'note')}" placeholder="Note" value={item.calls[item.calls.length
                         - 1].note} />
                     <input type="button" onClick="{() => addCall(item)}" value="Add call">
-                </td>
-                <td>
-                    <center>
-                        <input onClick="{updateValue(item, 'bidding')}" type="checkbox" checked="{item.bidding}" </center>
                 </td>
                 <td>
                     <center>
@@ -183,7 +178,7 @@
                                 contactName: "",
                                 email: ""
                             },
-                            bidding: true,
+                            intendsToBid:false,
                             bidded: false,
                             needsFollowUp: false,
                             calls: [
@@ -457,7 +452,6 @@
                         time: "",
                         note: ""
                     },
-                    bidding: true,
                     bidded: false,
                     intendsToBid:false,
                     needsFollowUp: false,
