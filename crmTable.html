@@ -314,11 +314,20 @@
                 </td>
                 <td>
                     <a>{countBids(tag)}</a>
-                    <input class="form-control" each={vendor in getBids(tag)} value="{vendor.name}">
+                    <ul class="list-group list-group-flush" style="max-height: 150px; overflow-y: scroll;">
+                            <li class="list-group-item" each={vendor in getBids(tag)}>
+                                    <input class="form-control"  value="{vendor.name}" readonly>
+                            </li>
+                    </ul>
                 </td>
                 <td>
                     <a>{countIntentions(tag)}</a>
-                    <input class="form-control" each={vendor in getIntentions(tag)} value="{vendor.name}">
+
+                    <ul class="list-group list-group-flush" style="max-height: 150px; overflow-y: scroll;">
+                            <li class="list-group-item" each={vendor in getIntentions(tag)}>
+                                    <input class="form-control"  value="{vendor.name}" readonly>
+                            </li>
+                    </ul>
                 </td>
 
                 <script>
