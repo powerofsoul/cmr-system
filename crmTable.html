@@ -141,7 +141,7 @@
                         } else if (by == "deadline") {
                             var deadline = $("#deadlineFilter").val();
                             globalInfo.items.forEach(el => {
-                                if (!el.tags.some(t => new Date(getTag(t).deadline).getTime() > new Date(deadline).getTime()))
+                                if (el.tags.find(t => new Date(getTag(t).deadline).getTime() <= new Date(deadline).getTime()) !=undefined)
                                     el.visible = true;
                                 else
                                     el.visible = false;
