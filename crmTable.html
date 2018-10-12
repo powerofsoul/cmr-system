@@ -426,6 +426,7 @@
                                     <input id="editTagModalHref" class="form-control" placeholder="HREF">
                                 </div>
                                 <div class="modal-footer">
+                                    <button type="button" class="btn btn-danger mr-auto" onclick="{deleteTag}">Delete</button>
                                     <button id="submit" type="button" data-dismiss="modal" class="btn btn-primary"
                                         onClick={editTag}>Edit</button>
                                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -508,6 +509,19 @@
                             globalInfo.tags[currentUsedItem] = { name: name, deadline: deadline, href: href };
                             saveItems();
                             this.update();
+                        }
+
+                        deleteTag(){
+                            var answer = confirm("Are you sure you want to delete this?");
+                            if(answer){
+                                $('#editTagModal').modal('toggle');
+                                globalInfo.items.forEach(e => {
+                                    var tagIndex = e.tags.findIndex(x=> x == currentUsedItem);
+                                    if(tagIndex >=0)
+                                        e.tags.splice(tagIndex, 1);
+                                });
+                            }
+                            saveItems();
                         }
                     </script>
 </crmTable>
