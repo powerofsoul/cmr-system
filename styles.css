@@ -1,0 +1,22 @@
+input, div {
+    margin-top: 5px;
+}
+.ui-autocomplete {
+    z-index: 99999;
+}
+th, td{
+    text-align: center;
+}
+.resizer {
+  position: absolute;
+  top: 0;
+  right: -8px;
+  bottom: 0;
+  left: auto;
+  width: 16px;    
+  cursor: col-resize;       
+}
+
+.list-group-item{
+    padding: 0;
+}
