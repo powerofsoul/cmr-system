@@ -281,6 +281,7 @@
                     var timer = setInterval(this.tick, 100);
 
                     changeView(){
+                        this.clearFilter();
                         var view = $("#viewSelect").val();
                         switch (view) {
                             case "CRM":
