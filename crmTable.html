@@ -301,6 +301,7 @@
     <table class="table" style="margin-top: 200px" if="{globalView == 1}">
         <thead>
             <tr>
+                <th scope="col">Action</th>
                 <th scope="col">Project Tag</th>
                 <th scope="col">Bids</th>
                 <th scope="col">Intending to bid</th>
@@ -308,6 +309,7 @@
         </thead>
         <tbody>
             <tr each={tag in globalInfo.tags}>
+                <td><button type="button" class="btn btn-dark">Archive</button></td>
                 <td>
                     <a href="{tag.href}">{tag.name}</a>|
                     <span>{tag.deadline}</span>
