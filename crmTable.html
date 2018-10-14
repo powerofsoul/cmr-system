@@ -608,7 +608,7 @@
 </tagInput>
 
 <tag>
-    <button class="btn btn-light" onclick="{editTag}"><i class="far fa-edit"></i></button>
+    <button class="btn btn-light" onclick="{editTag}" if={!opts.val.archived}><i class="far fa-edit"></i></button>
     <input class="btn btn-light" type="button" value="X" onClick={opts.remove} />
     <a href="{opts.val.href}">{opts.val.name}</a>|
     <span>{opts.val.deadline}</span>
