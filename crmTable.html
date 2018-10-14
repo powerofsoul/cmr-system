@@ -505,6 +505,7 @@
             var name = $("#addTagModalName").val();
             var deadline = $("#addTagModalDeadline").val();
             var href = $("#addTagModalHref").val();
+            var archived = false;
             if (href.indexOf("http://") != 0) href = "http://" + href;
             
             if(getTagWithName(name) != undefined){
@@ -512,7 +513,7 @@
                 return;
             }
 
-            globalInfo.tags[id] = { name: name, deadline: deadline, href: href };
+            globalInfo.tags[id] = { name: name, deadline: deadline, href: href, archived: archived };
             var item = globalInfo.items.find(x => x.id == currentUsedItem);
             item.tags.push(id);
           
