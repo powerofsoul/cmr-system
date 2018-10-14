@@ -15,7 +15,7 @@
 
 <script>
     globalInfo = { tags: [], items: [] }
-    globalView = 0;
+    globalView = 'CRM';
     //TO-DO find alternative to this global used id
     lastModified = new Date(0);
 
@@ -40,7 +40,7 @@
 
 </script>
 
-<crmTable items={items}></crmTable>
+<crmTable></crmTable>
 
 <script>
     riot.mount('*');

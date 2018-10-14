@@ -38,7 +38,7 @@
             </div>
         </div>
     </div>
-    <table class="table" style="margin-top: 200px" if="{globalView == 0}">
+    <table class="table" style="margin-top: 200px" if="{globalView == 'CRM'}">
         <thead>
             <tr>
                 <th scope="col">ID</th>
@@ -296,16 +296,8 @@
 
                     changeView(){
                         this.clearFilter();
-                        var view = $("#viewSelect").val();
-                        switch (view) {
-                            case "CRM":
-                                globalView = 0;
-                                break;
-                            case "Overview":
-                                globalView = 1;
-                                break;
-                        }
-
+                        var selectedView = $("#viewSelect").val();
+                        globalView = selectedView;
                         this.update();
                     }
                 </script>
@@ -314,7 +306,7 @@
     </table>
 
 
-    <table class="table" style="margin-top: 200px" if="{globalView == 1}">
+    <table class="table" style="margin-top: 200px" if="{globalView == 'Overview'}">
         <thead>
             <tr>
                 <th scope="col">Project Tag</th>
