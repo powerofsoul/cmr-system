@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="styles.css">
 
 <script>
-    globalInfo = { tags: [], items: [] }
+    globalInfo = { tags: {}, items: [] }
     globalView = 'CRM';
     //TO-DO find alternative to this global used id
     lastModified = new Date(0);
@@ -27,6 +27,21 @@
 
     function getTag(i) {
         return globalInfo.tags[i];
+    }
+
+    function getTagWithName(name) {
+        for (key in globalInfo.tags)
+            if (globalInfo.tags[key].name == name)
+                return globalInfo.tags[key];
+
+        return undefined;
+    }
+
+    function getTagsName(){
+        var names = []
+        for (key in globalInfo.tags)
+            names.push(globalInfo.tags[key].name);
+        return names;
     }
 
     function onlyUnique(value, index, self) {

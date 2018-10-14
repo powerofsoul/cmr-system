@@ -231,7 +231,7 @@
                     })
                     this.on("update", () => {
                         $(this.refs.tags).autocomplete({
-                            source: globalInfo.tags.map(x => x.name)
+                            source: getTagsName()
                         });
 
                         $(this.refs.mostRecentCall).datepicker({
@@ -415,7 +415,7 @@
                     <input id="addTagModalHref" class="form-control" placeholder="HREF">
                 </div>
                 <div class="modal-footer">
-                    <button id="submit" type="button" data-dismiss="modal" class="btn btn-primary" onClick={createTag}>Create</button>
+                    <button id="submit" type="button" class="btn btn-primary" onClick={createTag}>Create</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -501,13 +501,23 @@
             this.update();
         }
         createTag(){
+            var id = new Date().getTime();
             var name = $("#addTagModalName").val();
             var deadline = $("#addTagModalDeadline").val();
             var href = $("#addTagModalHref").val();
             if (href.indexOf("http://") != 0) href = "http://" + href;
-            globalInfo.tags.push({ name: name, deadline: deadline, href: href });
+            
+            if(getTagWithName(name) != undefined){
+                alert(`Tag with name ${name} already exists`);
+                return;
+            }
+
+            globalInfo.tags[id] = { name: name, deadline: deadline, href: href };
             var item = globalInfo.items.find(x => x.id == currentUsedItem);
-            item.tags.push(globalInfo.tags.length - 1);
+            item.tags.push(id);
+          
+            $('#addTagModal').modal('toggle');
+
             saveItems();
             this.update();
         }
