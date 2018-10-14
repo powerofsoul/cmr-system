@@ -14,6 +14,7 @@
                     <select class="custom-select" id="viewSelect" onChange={changeView}>
                         <option selected>CRM</option>
                         <option>Overview</option>
+                        <option>Archive</option>
                     </select>
                 </div>
             </div>
@@ -31,7 +32,8 @@
                 </div>
                 <div class="col" style="text-align:right">
                     <button type="button" class="btn btn-light" onClick="{addEntry}">Add entry</button>
-                    <button type="button" class="btn btn-light" data-toggle="modal" data-target="#addEntriesModal">Add multiple
+                    <button type="button" class="btn btn-light" data-toggle="modal" data-target="#addEntriesModal">Add
+                        multiple
                         entries
                     </button>
                 </div>
@@ -60,22 +62,22 @@
                     <tagInput tags={item.tags} itemId={item.id} />
                 </td>
                 <td style="width:300">
-                    <input class="form-control" onChange="{updateValue(item.vendor, 'name')}" ref="vendorName" placeholder="Vendor Name" value={item.vendor.name}
-                    />
-                    <input class="form-control" onChange="{updateValue(item.vendor, 'phone')}" ref="vendorPhone" placeholder="Phone number" value={item.vendor.phone}
-                    />
-                    <input class="form-control" onChange="{updateValue(item.vendor, 'contactName')}" placeholder="Contract Name" value={item.vendor.contactName}
-                    />
-                    <input class="form-control" onChange="{updateValue(item.vendor, 'email')}" placeholder="Email" value={item.vendor.email}
-                    />
+                    <input class="form-control" onChange="{updateValue(item.vendor, 'name')}" ref="vendorName"
+                        placeholder="Vendor Name" value={item.vendor.name} />
+                    <input class="form-control" onChange="{updateValue(item.vendor, 'phone')}" ref="vendorPhone"
+                        placeholder="Phone number" value={item.vendor.phone} />
+                    <input class="form-control" onChange="{updateValue(item.vendor, 'contactName')}" placeholder="Contract Name"
+                        value={item.vendor.contactName} />
+                    <input class="form-control" onChange="{updateValue(item.vendor, 'email')}" placeholder="Email"
+                        value={item.vendor.email} />
                 </td>
                 <td style="width:500px">
-                    <input class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'date')}" ref="mostRecentCall" placeholder="Date"
-                        value={item.calls[item.calls.length - 1].date} />
-                    <input class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'time')}" type="time" placeholder="Time"
-                        value={item.calls[item.calls.length - 1].time} />
-                    <textarea class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'note')}" placeholder="Note" value={item.calls[item.calls.length
-                        - 1].note} />
+                    <input class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'date')}" ref="mostRecentCall"
+                        placeholder="Date" value={item.calls[item.calls.length - 1].date} />
+                    <input class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'time')}"
+                        type="time" placeholder="Time" value={item.calls[item.calls.length - 1].time} />
+                    <textarea class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'note')}"
+                        placeholder="Note" value={item.calls[item.calls.length - 1].note} />
                     <input type="button" onClick="{() => addCall(item)}" value="Add call">
                 </td>
                 <td>
@@ -228,6 +230,26 @@
                                 $(this).change();
                             }
                         });
+
+                        $(this.refs.mostRecentCall).datepicker({
+                            onSelect: function (data) {
+                                $(this).get(0).dispatchEvent(new Event('change'));
+                            }
+                        });
+                        $("td:nth-child(2),td:nth-child(3), td:nth-child(4)")
+                            .css({
+                                position: "relative"
+                            })
+                            .prepend("<div class='resizer'></div>")
+                            .resizable({
+                                resizeHeight: false,
+                                handleSelector: "",
+                                onDragStart: function (e, $el, opt) {
+                                    if (!$(e.target).hasClass("resizer"))
+                                        return false;
+                                    return true;
+                                }
+                            });
                     })
                     this.on("update", () => {
                         $(this.refs.tags).autocomplete({
@@ -239,12 +261,32 @@
                                 $(this).get(0).dispatchEvent(new Event('change'));
                             }
                         });
+
+                        $(this.refs.mostRecentCall).datepicker({
+                            onSelect: function (data) {
+                                $(this).get(0).dispatchEvent(new Event('change'));
+                            }
+                        });
+                        $("td:nth-child(2),td:nth-child(3), td:nth-child(4)")
+                            .css({
+                                position: "relative"
+                            })
+                            .prepend("<div class='resizer'></div>")
+                            .resizable({
+                                resizeHeight: false,
+                                handleSelector: "",
+                                onDragStart: function (e, $el, opt) {
+                                    if (!$(e.target).hasClass("resizer"))
+                                        return false;
+                                    return true;
+                                }
+                            });
                     })
                     tick() {
                         $.get("utils.php", { requestType: "lastModified", token: new Date().getTime() }, (data) => {
                             modifiedDate = new Date(data);
                             if (lastModified == undefined || !(modifiedDate.getTime() === lastModified.getTime())) {
-                                $.get("utils.php", { requestType: "read", token: new Date().getTime() }, (data) => {
+                                $.get("utils.php", { requestType: "read", file: "records.json", token: new Date().getTime() }, (data) => {
                                     updatedInfo = JSON.parse(data);
                                     globalInfo.tags = updatedInfo.tags;
                                     updatedItems = updatedInfo.items;
@@ -295,16 +337,35 @@
                     var timer = setInterval(this.tick, 100);
 
                     changeView(){
-                        this.clearFilter();
                         var selectedView = $("#viewSelect").val();
                         globalView = selectedView;
-                        this.update();
+                        this.loadView();
                     }
+
+                    loadView(){
+                        switch (globalView) {
+                            case "CRM":
+                            case "Overview":
+                                this.clearFilter();
+                                break;
+                            case "Archive":
+                                this.loadArchive(this.update);
+                                break;
+                        }
+                    }
+                    //TO DO update as paramater is tricky.. this should work without it
+                    loadArchive(update) {
+                        $.get("utils.php", { requestType: "read", file: "archive.json", token: new Date().getTime() }, function (data) {
+                            archiveInfo = JSON.parse(data);
+                            update();
+                        });
+                    }
+
+
                 </script>
             </tr>
         </tbody>
     </table>
-
 
     <table class="table" style="margin-top: 200px" if="{globalView == 'Overview'}">
         <thead>
@@ -316,9 +377,9 @@
             </tr>
         </thead>
         <tbody>
-            <tr each={tag in globalInfo.tags}>
+            <tr each={tag, key in globalInfo.tags} if="{!tag.archived}">
                 <td style="width:150px;">
-                    <button type="button" class="btn btn-dark">Archive</button>
+                    <button type="button" class="btn btn-dark" onclick="{()=>archiveTag(key)}">Archive</button>
                 </td>
                 <td>
                     <a href="{tag.href}">{tag.name}</a>|
@@ -355,12 +416,189 @@
                     getIntentions(tag){
                         return globalInfo.items.filter(x => x.tags.find(t => JSON.stringify(getTag(t)) === JSON.stringify(tag) && x.intendsToBid == true) != undefined).map(x => x.vendor);
                     }
+
+                    archiveTag(tag){
+                        var tagName = globalInfo.tags[tag].name;
+                        var answer = confirm(`Are you sure that you want to archive ${tagName} ?`)
+                        if (!answer) return;
+
+                        globalInfo.tags[tag].archived = true;
+
+                        var archivedObjectPreview = {};
+                        archivedObjectPreview["tag"] = globalInfo.tags[tag];
+                        var archivedItems = { items: globalInfo.items.filter(x => x.tags.indexOf(tag) >= 0) }
+                        archivedItems.tags = globalInfo.tags;
+
+                        var bids = archivedItems.items.filter(x => x.bidded == true).map(x => x.vendor.name);
+                        var intendsToBid = archivedItems.items.filter(x => x.intendsToBid == true).map(x => x.vendor.name);
+                        var archivedOn = new Date().toLocaleDateString("en-US");
+
+                        archivedObjectPreview["id"] = tag;
+                        if (bids != undefined)
+                            archivedObjectPreview["bids"] = bids;
+                        else
+                            archivedObjectPreview["bids"] = []
+                        if (intendsToBid != undefined)
+                            archivedObjectPreview["intendsToBid"] = intendsToBid;
+                        else
+                            archivedObjectPreview["intendsToBid"] = [];
+                        archivedObjectPreview["archivedOn"] = archivedOn;
+
+                        var removeTag = true;
+                        var itemsToBeRemoved = [];
+
+                        for (var i = 0; i < globalInfo.items.length; i++) {
+                            var currentItem = globalInfo.items[i];
+                            if (currentItem.tags.indexOf(tag) == -1) continue;
+                            var itemShouldBeDeleted = currentItem.tags.find(x => getTag(x).archived == false) == undefined;
+                            if (itemShouldBeDeleted) {
+                                itemsToBeRemoved.push(i);
+                            } else {
+                                removeTag = false;
+                            }
+                        }
+
+                        var tagsToRemove = [];
+                        for (var key in globalInfo.tags) {
+                            if (globalInfo.items.filter(i => i.tags.indexOf(key) >= 0).every(x => x.tags.every(t => getTag(t).archived)))
+                                tagsToRemove.push(key);
+                        }
+
+                        tagsToRemove.forEach(tag => {
+                            delete globalInfo.tags[tag];
+                        });
+
+                        itemsToBeRemoved.sort().reverse();
+                        console.log(itemsToBeRemoved);
+                        itemsToBeRemoved.forEach(e => {
+                            globalInfo.items.splice(e, 1);
+                        });
+
+                        $.post("utils.php", { requestType: "archiveTag", previewTag: archivedObjectPreview, items: archivedItems, id: tag },
+                            (data) => {
+                                console.log(data);
+                            });
+
+                        saveItems();
+                        this.update();
+                        console.log(archivedObjectPreview);
+                    }
                 </script>
             </tr>
         </tbody>
 
 
     </table>
+
+    <table class="table" style="margin-top:200px" if="{globalView == 'Archive'}">
+            <thead>
+                    <tr>
+                        <th scope="col">Action</th>
+                        <th scope="col">Project Tag</th>
+                        <th scope="col">Bids</th>
+                        <th scope="col">Intending to bid</th>
+                        <th scope="col">Archived on</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr each={info in archiveInfo}>
+                        <td>
+                            <button type="button" class="btn btn-dark" onClick="{()=> viewCalls(info.id)}">View all calls</button>
+                        </td>
+                        <td>
+                            <a href={info.tag.href}>{info.tag.name}</a>
+                            <a>|{info.tag.deadline}</a>
+                        </td>
+                        <td>
+                            <center>{info.bids.length}</center>
+                            <ul class="list-group list-group-flush" style="max-height: 150px; overflow-y: scroll;">
+                                <li class="list-group-item" each={val in info.bids}>
+                                    <input class="form-control" value="{val}" readonly>
+                                </li>
+                            </ul>
+                        </td>
+                        <td>
+                            <center>{info.intendsToBid.length}</center>
+                            <ul class="list-group list-group-flush" style="max-height: 150px; overflow-y: scroll;">
+                                <li class="list-group-item" each={val in info.intendsToBid}>
+                                    <input class="form-control" value="{val}" readonly>
+                                </li>
+                            </ul>
+                        </td>
+                        <td>{info.archivedOn}</td>
+                    </tr>
+                    <script>
+                        viewCalls(id){
+                            globalView = "ArchivedTag";
+                            var updateFunction = this.update;
+                            $.get("utils.php", { requestType: "read", file: `archive\\${id}.json`, token: new Date().getTime() }, function (data) {
+                                archivedTag = JSON.parse(data);
+                                updateFunction();
+                            });
+                        }
+                    </script>
+                </tbody>
+    </table>
+    <div style="margin-top:200px" if="{globalView == 'ArchivedTag'}">
+        
+        <button type="button" onclick="{()=>changeView('ArchiveTag')}" class="btn btn-primary">&lt;-Back to Archive List</button>
+        <table class="table" >
+                <thead>
+                        <tr>
+                            <th scope="col">Project Tag</th>
+                            <th scope="col">Vendor</th>
+                            <th scope="col">Most Recent Call</th>
+                            <th scope="col">Needs Follow Up</th>
+                            <th scope="col">Intends to bid</th>
+                            <th scope="col">Bidded</th>
+                            <th scope="col">Previous Calls</th>
+                        </tr>
+                    </thead>
+                    <tbody>    
+                        <tr each={item in archivedTag.items}>
+                            <td>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item" each={tag in item.tags}>
+                                        <a href={archivedTag.tags[tag].href}>{archivedTag.tags[tag].name}</a>
+                                        <a>|{archivedTag.tags[tag].deadline}</a>
+                                    </li>
+                                </ul>          
+                            </td>
+                            <td>
+                                <input class="form-control" value={item.vendor.name} readonly>
+                                <input class="form-control" value={item.vendor.phone} readonly>
+                                <input class="form-control" value={item.vendor.contactName} readonly>
+                                <input class="form-control" value={item.vendor.email} readonly>
+                            </td>
+                            <td>
+                                <input class="form-control" value={item.calls[item.calls.length - 1].date} disabled/>
+                                <input class="form-control" value={item.calls[item.calls.length - 1].time} disabled/>
+                                <input class="form-control" value={item.calls[item.calls.length - 1].note} disabled/>
+                            </td>
+                            <td>
+                                <input type="checkbox" checked="{item.needsFollowUp}" disabled>
+                            </td>
+                            <td>
+                                <input type="checkbox" checked="{item.intendsToBid}" disabled>
+                            </td>
+                            <td>
+                                <input type="checkbox" checked="{item.bidded}" disabled>
+                            </td>
+                            <td style="width:300px">
+                                <ul class="list-group list-group-flush" style="max-height: 150px; overflow-y: scroll;">
+                                    <li class="list-group-item" each={call, index in item.calls}>
+                                        <div if={index !=item.calls.length-1}>
+                                            <input class="form-control" value="{call.date}" disabled/>
+                                            <input class="form-control" value="{call.time}" disabled/>
+                                            <textarea class="form-control" value="{call.note}" disabled/>  
+                                        </div>
+                                    </li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </tbody>
+        </table>
+    </div>
     <div class="modal" id="addEntriesModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -391,171 +629,172 @@
                     </ul>
                     Values:
                     <textarea class="form-control" id="inputFields" style="width:100%"></textarea>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" onClick="{import}">Add</button>
-                    <button type="button" class="btn" data-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal" onClick="{import}">Add</button>
+                        <button type="button" class="btn" data-dismiss="modal">Cancel</button>
+                    </div>
+                    </div>
+                    </div>
+                    </div>
 
-    <div id="addTagModal" class="modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <input id="addTagModalName" class="form-control" placeholder="Project Name">
-                    <input id="addTagModalDeadline" class="form-control" placeholder="Deadline">
-                    <input id="addTagModalHref" class="form-control" placeholder="HREF">
-                </div>
-                <div class="modal-footer">
-                    <button id="submit" type="button" class="btn btn-primary" onClick={createTag}>Create</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
+                    <div id="addTagModal" class="modal" tabindex="-1" role="dialog">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Add</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <input id="addTagModalName" class="form-control" placeholder="Project Name">
+                                    <input id="addTagModalDeadline" class="form-control" placeholder="Deadline">
+                                    <input id="addTagModalHref" class="form-control" placeholder="HREF">
+                                </div>
+                                <div class="modal-footer">
+                                    <button id="submit" type="button" class="btn btn-primary" onClick={createTag}>Create</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-    <div id="editTagModal" class="modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <input id="editTagModalName" class="form-control" placeholder="Project Name">
-                    <input id="editTagModalDeadline" class="form-control" placeholder="Deadline">
-                    <input id="editTagModalHref" class="form-control" placeholder="HREF">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger mr-auto" onclick="{deleteTag}">Delete</button>
-                    <button id="submit" type="button" data-dismiss="modal" class="btn btn-primary" onClick={editTag}>Edit</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
+                    <div id="editTagModal" class="modal" tabindex="-1" role="dialog">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Add</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <input id="editTagModalName" class="form-control" placeholder="Project Name">
+                                    <input id="editTagModalDeadline" class="form-control" placeholder="Deadline">
+                                    <input id="editTagModalHref" class="form-control" placeholder="HREF">
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-danger mr-auto" onclick="{deleteTag}">Delete</button>
+                                    <button id="submit" type="button" data-dismiss="modal" class="btn btn-primary"
+                                        onClick={editTag}>Edit</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-    <script>
-        this.selectedEntryFields = [];
+                    <script>
+                        this.selectedEntryFields = [];
 
-        addField(){
-            var selectedField = $("#fields").val();
-            if (this.selectedEntryFields.indexOf(selectedField) == -1)
-                this.selectedEntryFields.push(selectedField);
-        }
+                        addField(){
+                            var selectedField = $("#fields").val();
+                            if (this.selectedEntryFields.indexOf(selectedField) == -1)
+                                this.selectedEntryFields.push(selectedField);
+                        }
 
-        removeField(field){
-            this.selectedEntryFields.pop(field);
-            this.update();
-        }
+                        removeField(field){
+                            this.selectedEntryFields.pop(field);
+                            this.update();
+                        }
 
-        import(){
-            var input = $("#inputFields").val();
-            input = input.split("\n").map(i => i.trim("	 ").split("\t")).filter(i => i.length != 0 || i.every(e => e == ""));
+                        import(){
+                            var input = $("#inputFields").val();
+                            input = input.split("\n").map(i => i.trim("	 ").split("\t")).filter(i => i.length != 0 || i.every(e => e == ""));
 
-            input.forEach(e => {
-                var defaultItem = {
-                    id: getLastId() + 1,
-                    tags: [],
-                    deadline: "",
-                    vendor: {
-                        name: "",
-                        phone: "",
-                        contactName: "",
-                        email: ""
-                    },
-                    call0: {
-                        date: "",
-                        time: "",
-                        note: ""
-                    },
-                    bidded: false,
-                    intendsToBid: false,
-                    needsFollowUp: false,
-                    calls: [
-                        { date: "", time: "", note: "" },
-                    ],
-                    note: "",
-                    visible: true
-                };
-                for (var i = 0; i < this.selectedEntryFields.length; i++) {
-                    var p = this.selectedEntryFields[i].split(".")[0];
-                    var p2 = this.selectedEntryFields[i].split(".")[1];
-                    defaultItem[p][p2] = e[i];
-                }
-                defaultItem.id = getLastId() + 1;
-                globalInfo.items.push(defaultItem);
+                            input.forEach(e => {
+                                var defaultItem = {
+                                    id: getLastId() + 1,
+                                    tags: [],
+                                    deadline: "",
+                                    vendor: {
+                                        name: "",
+                                        phone: "",
+                                        contactName: "",
+                                        email: ""
+                                    },
+                                    call0: {
+                                        date: "",
+                                        time: "",
+                                        note: ""
+                                    },
+                                    bidded: false,
+                                    intendsToBid: false,
+                                    needsFollowUp: false,
+                                    calls: [
+                                        { date: "", time: "", note: "" },
+                                    ],
+                                    note: "",
+                                    visible: true
+                                };
+                                for (var i = 0; i < this.selectedEntryFields.length; i++) {
+                                    var p = this.selectedEntryFields[i].split(".")[0];
+                                    var p2 = this.selectedEntryFields[i].split(".")[1];
+                                    defaultItem[p][p2] = e[i];
+                                }
+                                defaultItem.id = getLastId() + 1;
+                                globalInfo.items.push(defaultItem);
 
-            });
-            saveItems();
-            this.update();
-        }
-        createTag(){
-            var id = new Date().getTime();
-            var name = $("#addTagModalName").val();
-            var deadline = $("#addTagModalDeadline").val();
-            var href = $("#addTagModalHref").val();
-            var archived = false;
-            if (href.indexOf("http://") != 0) href = "http://" + href;
-            
-            if(getTagWithName(name) != undefined){
-                alert(`Tag with name ${name} already exists`);
-                return;
-            }
+                            });
+                            saveItems();
+                            this.update();
+                        }
+                        createTag(){
+                            var id = new Date().getTime().toString();
+                            var name = $("#addTagModalName").val();
+                            var deadline = $("#addTagModalDeadline").val();
+                            var href = $("#addTagModalHref").val();
+                            var archived = false;
+                            if (href.indexOf("http://") != 0) href = "http://" + href;
 
-            globalInfo.tags[id] = { name: name, deadline: deadline, href: href, archived: archived };
-            var item = globalInfo.items.find(x => x.id == currentUsedItem);
-            item.tags.push(id);
-          
-            $('#addTagModal').modal('toggle');
+                            if (getTagWithName(name) != undefined) {
+                                alert(`Tag with name ${name} already exists`);
+                                return;
+                            }
 
-            saveItems();
-            this.update();
-        }
-        editTag(){
-            var name = $("#editTagModalName").val();
-            var deadline = $("#editTagModalDeadline").val();
-            var href = $("#editTagModalHref").val();
+                            globalInfo.tags[id] = { name: name, deadline: deadline, href: href, archived: archived };
+                            var item = globalInfo.items.find(x => x.id == currentUsedItem);
+                            item.tags.push(id);
 
-            globalInfo.tags[currentUsedItem] = { name: name, deadline: deadline, href: href };
-            saveItems();
-            this.update();
-        }
+                            $('#addTagModal').modal('toggle');
 
-        deleteTag(){
-            var answer = confirm("Are you sure you want to delete this?");
-            if (answer) {
-                $('#editTagModal').modal('toggle');
-                globalInfo.items.forEach(e => {
-                    var tagIndex = e.tags.findIndex(x => x == currentUsedItem);
-                    if (tagIndex >= 0)
-                        e.tags.splice(tagIndex, 1);
-                });
-            }
-            saveItems();
-        }
-    </script>
+                            saveItems();
+                            this.update();
+                        }
+                        editTag(){
+                            var name = $("#editTagModalName").val();
+                            var deadline = $("#editTagModalDeadline").val();
+                            var href = $("#editTagModalHref").val();
+
+                            globalInfo.tags[currentUsedItem] = { name: name, deadline: deadline, href: href };
+                            saveItems();
+                            this.update();
+                        }
+
+                        deleteTag(){
+                            var answer = confirm("Are you sure you want to delete this?");
+                            if (answer) {
+                                $('#editTagModal').modal('toggle');
+                                globalInfo.items.forEach(e => {
+                                    var tagIndex = e.tags.findIndex(x => x == currentUsedItem);
+                                    if (tagIndex >= 0)
+                                        e.tags.splice(tagIndex, 1);
+                                });
+                            }
+                            saveItems();
+                        }
+                    </script>
 </crmTable>
 
 <tagInput>
     <div class="dropdown" style="text-align:center">
-        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
-            aria-expanded="false">
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
             Add tag
         </button>
         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
             <a class="dropdown-item" onClick="{createTag}">Create New +</a>
-            <a class="dropdown-item" each={tag, index in globalInfo.tags} onclick="{()=> add(index)}">{tag.name}</a>
+            <a class="dropdown-item" each={tag, index in globalInfo.tags} onclick="{()=> add(index)}" if="{!tag.archived}">{tag.name}</a>
         </div>
     </div>
     <ul class="list-group list-group-flush" style="max-height: 150px; overflow-y: scroll;" width="150px">
@@ -645,12 +884,9 @@
 </callColumn>
 
 <call>
-    <input class="form-control" onChange="{updateValue(opts.val, 'date')}" ref="date" placeholder="Date" value="{this.opts.val.date}"
-    />
-    <input class="form-control" onChange="{updateValue(opts.val, 'time')}" type="time" placeholder="Time" value="{this.opts.val.time}"
-    />
-    <textarea class="form-control" onChange="{updateValue(opts.val, 'note')}" placeholder="Note" value="{this.opts.val.note}"
-    />
+    <input class="form-control" onChange="{updateValue(opts.val, 'date')}" ref="date" placeholder="Date" value="{this.opts.val.date}" />
+    <input class="form-control" onChange="{updateValue(opts.val, 'time')}" type="time" placeholder="Time" value="{this.opts.val.time}" />
+    <textarea class="form-control" onChange="{updateValue(opts.val, 'note')}" placeholder="Note" value="{this.opts.val.note}" />
     <input type="button" class="btn btn-danger" value="Delete Call" onclick="{opts.remove}" />
     <script>
         this.on('mount', function () {
