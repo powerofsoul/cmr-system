@@ -857,7 +857,7 @@
             var tag = getTag(this.opts.index);
             $("#editTagModalName").val(tag.name);
             $("#editTagModalDeadline").datepicker();
-            $('#editTagModalDeadline').datepicker("setDate", new Date(tag.date));
+            $('#editTagModalDeadline').datepicker("setDate", new Date(tag.deadline));
             $("#editTagModalHref").val(tag.href);
             currentUsedItem = this.opts.index;
             $("#editTagModal").modal();
