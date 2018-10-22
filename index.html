@@ -22,7 +22,7 @@
     lastModified = new Date(0);
 
     function saveItems() {
-        $.get("utils.php", { requestType: "write", records: JSON.stringify(globalInfo), token: new Date().getTime() }, (data) => {
+        $.post("utils.php", { requestType: "write", records: JSON.stringify(globalInfo), token: new Date().getTime() }, (data) => {
             console.log(data);
         });
     }

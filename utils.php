@@ -1,10 +1,7 @@
 <?php
-if(isset($_GET["requestType"]))
-    $requestType = $_GET["requestType"];
-else
-    $requestType = $_POST["requestType"];
+$requestType = $_POST["requestType"];
 if($requestType == "write"){
-    $records = $_GET["records"];
+    $records = $_POST["records"];
     $recordsFile = fopen("records.json", "w") or die("Unable to open file!");
     
     fwrite($recordsFile, $records);
@@ -13,8 +10,8 @@ if($requestType == "write"){
     echo date('D M d Y H:i:s O', filemtime("records.json"));
 }
 else if($requestType == "read"){
-    $file = fopen($_GET["file"], "r") or die("Unable to open file!");
-    echo fread($file,filesize($_GET["file"]));
+    $file = fopen($_POST["file"], "r") or die("Unable to open file!");
+    echo fread($file,filesize($_POST["file"]));
     fclose($file);
 }
 else if($requestType == "lastModified"){

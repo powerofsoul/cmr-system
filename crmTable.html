@@ -24,9 +24,11 @@
                     <input type="checkbox" onClick={filterFollowUp} />
                 </div>
                 <div class="col">
+                <input type="button" class="btn btn-light" value="Clear filters" onClick="{clearFilter}" />
                 </div>
                 <div class="col">
-                    <input type="button" class="btn btn-light" value="Clear filters" onClick="{clearFilter}" />
+                     <span>Latest update:</span>
+                      {getLastModified()}
                 </div>
                 <div class="col">
                 </div>
@@ -96,6 +98,9 @@
                     <callColumn calls="{item.calls}" />
                 </td>
                 <script>
+                    getLastModified(){
+                        return lastModified.toLocaleDateString("en-US") + " " + lastModified.toLocaleTimeString();
+                    }
                     updateValue(a, b){
                         return function (event, c) {
                             if (event.target.type == "checkbox") {
@@ -283,10 +288,10 @@
                             });
                     })
                     tick() {
-                        $.get("utils.php", { requestType: "lastModified", token: new Date().getTime() }, (data) => {
+                        $.post("utils.php", { requestType: "lastModified", token: new Date().getTime() }, (data) => {
                             modifiedDate = new Date(data);
                             if (lastModified == undefined || !(modifiedDate.getTime() === lastModified.getTime())) {
-                                $.get("utils.php", { requestType: "read", file: "records.json", token: new Date().getTime() }, (data) => {
+                                $.post("utils.php", { requestType: "read", file: "records.json", token: new Date().getTime() }, (data) => {
                                     updatedInfo = JSON.parse(data);
                                     globalInfo.tags = updatedInfo.tags;
                                     updatedItems = updatedInfo.items;
@@ -355,7 +360,7 @@
                     }
                     //TO DO update as paramater is tricky.. this should work without it
                     loadArchive(update) {
-                        $.get("utils.php", { requestType: "read", file: "archive.json", token: new Date().getTime() }, function (data) {
+                        $.post("utils.php", { requestType: "read", file: "archive.json", token: new Date().getTime() }, function (data) {
                             archiveInfo = JSON.parse(data);
                             update();
                         });
@@ -531,7 +536,7 @@
                         viewCalls(id){
                             globalView = "ArchivedTag";
                             var updateFunction = this.update;
-                            $.get("utils.php", { requestType: "read", file: `archive\\${id}.json`, token: new Date().getTime() }, function (data) {
+                            $.post("utils.php", { requestType: "read", file: `archive\\${id}.json`, token: new Date().getTime() }, function (data) {
                                 archivedTag = JSON.parse(data);
                                 updateFunction();
                             });
