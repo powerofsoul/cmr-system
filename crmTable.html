@@ -294,6 +294,7 @@
                                 $.post("utils.php", { requestType: "read", file: "records.json", token: new Date().getTime() }, (data) => {
                                     updatedInfo = JSON.parse(data);
                                     globalInfo.tags = updatedInfo.tags;
+                                    if(globalInfo.items.length == 0) updatedInfo.items.forEach(x=> x.visible = true);
                                     updatedItems = updatedInfo.items;
                                     var items = globalInfo.items;
                                     for (var i = 0; i < updatedItems.length; i++) {
