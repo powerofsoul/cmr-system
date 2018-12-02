@@ -478,17 +478,17 @@
                 </td>
 
                 <script>
-                    countBids(tag){
-                        return globalInfo.items.filter(x => x.tags.find(t => JSON.stringify(getTag(t)) === JSON.stringify(tag) && x.bidded == true) != undefined).length;
+                    countBids(tag){            
+                        return globalInfo.items.filter(x => x.tags.find(t => JSON.stringify(getTag(t)) === JSON.stringify(tag)) && 'bidded' in x.status).length;
                     }
                     getBids(tag){
-                        return globalInfo.items.filter(x => x.tags.find(t => JSON.stringify(getTag(t)) === JSON.stringify(tag) && x.bidded == true) != undefined).map(x => x.vendor);
+                        return globalInfo.items.filter(x => x.tags.find(t => JSON.stringify(getTag(t)) === JSON.stringify(tag)) && 'bidded' in x.status).map(x => x.vendor);
                     }
                     countIntentions(tag){
-                        return globalInfo.items.filter(x => x.tags.find(t => JSON.stringify(getTag(t)) === JSON.stringify(tag) && x.intendsToBid == true) != undefined).length;
+                        return globalInfo.items.filter(x => x.tags.find(t => JSON.stringify(getTag(t)) === JSON.stringify(tag)) && 'intendsToBid' in x.status).length;
                     }
                     getIntentions(tag){
-                        return globalInfo.items.filter(x => x.tags.find(t => JSON.stringify(getTag(t)) === JSON.stringify(tag) && x.intendsToBid == true) != undefined).map(x => x.vendor);
+                        return globalInfo.items.filter(x => x.tags.find(t => JSON.stringify(getTag(t)) === JSON.stringify(tag)) && 'intendsToBid' in x.status).map(x => x.vendor);
                     }
 
                     archiveTag(tag){
