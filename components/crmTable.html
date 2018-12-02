@@ -2,12 +2,6 @@
     <div style="background-color:#f4f4f4;">
         <div class="container-full" style="margin-left:30;margin-right: 30">
             <div class="row">
-                <div class="col">
-                    Project tag: <input class="form-control" ref="tags" id="tagFilter" placeholder="Tag Name" />
-                </div>
-                <div class="col">
-                    Ending Before: <input class="form-control" ref="date" id="deadlineFilter" placeholder="Date">
-                </div>
                 <div class="col"></div>
                 <div class="col">
                     Viewing:
@@ -19,35 +13,58 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col">
-                    <span>Show only vendors needing follow up</span>
-                    <input type="checkbox" onClick={filterFollowUp} />
-                </div>
-                <div class="col">
-                <input type="button" class="btn btn-light" value="Clear filters" onClick="{clearFilter}" />
-                </div>
+                
                 <div class="col">
                      <span>Latest update:</span>
                       {getLastModified()}
                 </div>
                 <div class="col">
                 </div>
-                <div class="col" style="text-align:right">
+            </div>
+        </div>
+    </div>
+    <div class="crm-view" if="{globalView == 'CRM'}">
+        <div class="side-menu">
+            <div class="container">
+                <div class="side-menu-row">
+                    <h4>Filter By</h4>
+                </div>
+                <div class="side-menu-row">
+                    Project tag: <input class="form-control" ref="tags" id="tagFilter" placeholder="Tag Name" />
+                </div>
+                <div class="side-menu-row">
+                    Project Manager(tbi): <input class="form-control" ref="tags" id="projectManagerFilter" placeholder="Project Manager" />
+                </div>
+                <div class="side-menu-row">
+                    Ending Before: <input class="form-control" ref="date" id="deadlineFilter" placeholder="Date">
+                </div>
+                <div class="side-menu-row">
+                    <input type="button" class="btn btn-light" value="Clear filters" onClick="{clearFilter}" />
+                </div>
+                <div class="side-menu-row">
+                    <h4>Hidden rows</h4>
+                </div>
+                <div class="side-menu-row">
+                    <input type="checkbox"> Show Hidden
+                </div>
+                <div class="side-menu-row">
+                    <h4>Add</h4>
+                </div>
+                <div class="side-menu-row" style="text-align:center">
                     <button type="button" class="btn btn-light" onClick="{addEntry}">Add entry</button>
                     <button type="button" class="btn btn-light" data-toggle="modal" data-target="#addEntriesModal">Add
                         multiple
                         entries
                     </button>
                 </div>
+                <div class="side-menu-row">
+                    <span>Show only vendors needing follow up</span>
+                    <input type="checkbox" onClick={filterFollowUp} />
+                </div>
             </div>
         </div>
-    </div>
-    <div class="crm-view" if="{globalView == 'CRM'}">
-        <div class="side-menu">
-            test
-        </div>
         <div class="table view-content">
-            <table>
+            <table style="width:100%">
                 <thead>
                     <tr>
                         <th scope="col">ID</th>

@@ -34,6 +34,7 @@ th, td{
 .crm-view{
     display:flex;
     height:80%;
+    width:100%;
 }
 
 .side-menu{
@@ -41,6 +42,7 @@ th, td{
     margin:20px;
     height:100%;
     background-color:white;
+    overflow:auto;
 }
 
 .view-content{
@@ -52,4 +54,8 @@ th, td{
 
 body{
     background-color:rgb(235, 235, 235);
+}
+
+.side-menu-row{
+    margin-top:15px;
 }
