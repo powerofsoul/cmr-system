@@ -99,22 +99,22 @@
                         </td>
                         <td style="text-align:left;">
                             <div>
-                                <input name="status" onChange="{()=>updateStatus(item, 'reviewing')}" type="radio" checked="{item.status.reviewing}">
+                                <input name="{item.id}" onChange="{()=>updateStatus(item, 'reviewing')}" type="radio" checked="{item.status.reviewing}">
                                 <b>Reviewing</b>
                                 <span class="dot" style="background-color:gray"></span>
                             </div>
                             <div>
-                                <input name="status" onChange="{()=>updateStatus(item, 'intendsToBid')}" type="radio" checked="{item.status.intendsToBid}">
+                                <input name="{item.id}"  onChange="{()=>updateStatus(item, 'intendsToBid')}" type="radio" checked="{item.status.intendsToBid}">
                                 <b>Intends to bid</b>
                                 <span class="dot" style="background-color:yellow"></span>
                             </div>
                             <div>
-                                <input name="status" onChange="{()=>updateStatus(item, 'bidded')}" type="radio" checked="{item.status.bidded}">
+                                <input name="{item.id}"  onChange="{()=>updateStatus(item, 'bidded')}" type="radio" checked="{item.status.bidded}">
                                 <b>Bidded</b>
                                 <span class="dot" style="background-color:green"></span>
                             </div>
                             <div>
-                                <input name="status" onChange="{()=>updateStatus(item, 'notBidding')}" type="radio" checked="{item.status.notBidding}">
+                                <input name="{item.id}"  onChange="{()=>updateStatus(item, 'notBidding')}" type="radio" checked="{item.status.notBidding}">
                                 <b>Not bidding</b>
                                 <span class="dot" style="background-color:red"></span>
                             </div>
