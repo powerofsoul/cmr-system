@@ -30,3 +30,26 @@ th, td{
     border-style:solid;
     display: inline-block;
 }
+
+.crm-view{
+    display:flex;
+    height:80%;
+}
+
+.side-menu{
+    width:15%;
+    margin:20px;
+    height:100%;
+    background-color:white;
+}
+
+.view-content{
+    margin:20px;
+    height:100%;
+    background-color:white;
+    overflow:auto;
+}
+
+body{
+    background-color:rgb(235, 235, 235);
+}

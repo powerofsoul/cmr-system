@@ -1,5 +1,5 @@
 <crmTable>
-    <div class="fixed-top" style="background-color:#f4f4f4;">
+    <div style="background-color:#f4f4f4;">
         <div class="container-full" style="margin-left:30;margin-right: 30">
             <div class="row">
                 <div class="col">
@@ -42,377 +42,383 @@
             </div>
         </div>
     </div>
-    <table class="table" style="margin-top: 200px" if="{globalView == 'CRM'}">
-        <thead>
-            <tr>
-                <th scope="col">ID</th>
-                <th scope="col">Project Tag</th>
-                <th scope="col">Vendor</th>
-                <th scope="col">Most recent call</th>
-                <th scope="col">Needs Follow Up</th>
-                <th scope="col">Status</th>
-                <th scope="col">Previous calls</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr each={ item in globalInfo.items } if={item.visible}>
-                <td style="text-align: center">{item.id}
-                    <br>
-                    <input type="button" class="btn btn-danger" value="Delete" onclick="{()=> deleteItem(item)}" /></td>
-                <td>
-                    <tagInput tags={item.tags} itemId={item.id} />
-                    <br>
-                    <span class="dot" style="background-color:gray;width:25px;height:25px;" if="{item.status.reviewing=='on'}"></span>
-                    <span class="dot" style="background-color:yellow;width:25px;height:25px;" if="{item.status.intendsToBid=='on'}"></span>
-                    <span class="dot" style="background-color:green;width:25px;height:25px;" if="{item.status.bidded=='on'}"></span>
-                    <span class="dot" style="background-color:red;width:25px;height:25px;" if="{item.status.notBidding=='on'}"></span>
-                </td>
-                <td style="width:300">
-                    <input class="form-control" onChange="{updateValue(item.vendor, 'name')}" ref="vendorName"
-                        placeholder="Vendor Name" value={item.vendor.name} />
-                    <input class="form-control" onChange="{updateValue(item.vendor, 'phone')}" ref="vendorPhone"
-                        placeholder="Phone number" value={item.vendor.phone} />
-                    <input class="form-control" onChange="{updateValue(item.vendor, 'contactName')}" placeholder="Contact Name"
-                        value={item.vendor.contactName} />
-                    <input class="form-control" onChange="{updateValue(item.vendor, 'email')}" placeholder="Email"
-                        value={item.vendor.email} />
-                    <button class="btn btn-success" style="margin-top:10px;width:100%" onClick="{() => onboardUser(item)}">Onboard user</button>
-                </td>
-                <td style="width:500px">
-                    <input class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'date')}" ref="mostRecentCall"
-                        placeholder="Date" value={item.calls[item.calls.length - 1].date} />
-                    <input class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'time')}"
-                        type="time" placeholder="Time" value={item.calls[item.calls.length - 1].time} />
-                    <textarea class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'note')}"
-                        placeholder="Note" value={item.calls[item.calls.length - 1].note} />
-                    <input type="button" onClick="{() => addCall(item)}" value="Add call">
-                </td>
-                <td>
-                    <center>
-                        <input onClick="{updateValue(item, 'needsFollowUp')}" type="checkbox" checked="{item.needsFollowUp}">
-                    </center>
-                </td>
-                <td style="text-align:left;">
-                    <div>
-                        <input name="status" onChange="{()=>updateStatus(item, 'reviewing')}" type="radio" checked="{item.status.reviewing}">
-                        <b>Reviewing</b>
-                        <span class="dot" style="background-color:gray"></span>
-                    </div>
-                    <div>
-                        <input name="status" onChange="{()=>updateStatus(item, 'intendsToBid')}" type="radio" checked="{item.status.intendsToBid}">
-                        <b>Intends to bid</b>
-                        <span class="dot" style="background-color:yellow"></span>
-                    </div>
-                    <div>
-                        <input name="status" onChange="{()=>updateStatus(item, 'bidded')}" type="radio" checked="{item.status.bidded}">
-                        <b>Bidded</b>
-                        <span class="dot" style="background-color:green"></span>
-                    </div>
-                    <div>
-                        <input name="status" onChange="{()=>updateStatus(item, 'notBidding')}" type="radio" checked="{item.status.notBidding}">
-                        <b>Not bidding</b>
-                        <span class="dot" style="background-color:red"></span>
-                    </div>
-                </td>
-                <td style="width:300px">
-                    <callColumn calls="{item.calls}" />
-                </td>
-                <script>
-                    getLastModified(){
-                        return lastModified.toLocaleDateString("en-US") + " " + lastModified.toLocaleTimeString();
-                    }
-                    updateValue(a, b){
-                        return function (event, c) {
-                            if (event.target.type == "checkbox") {
-                                a[b] = event.target.checked;
-                            } else {
-                                a[b] = event.target.value.trim();
+    <div class="crm-view" if="{globalView == 'CRM'}">
+        <div class="side-menu">
+            test
+        </div>
+        <div class="table view-content">
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Project Tag</th>
+                        <th scope="col">Vendor</th>
+                        <th scope="col">Most recent call</th>
+                        <th scope="col">Needs Follow Up</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Previous calls</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr each={ item in globalInfo.items } if={item.visible}>
+                        <td style="text-align: center">{item.id}
+                            <br>
+                            <input type="button" class="btn btn-danger" value="Delete" onclick="{()=> deleteItem(item)}" /></td>
+                        <td>
+                            <tagInput tags={item.tags} itemId={item.id} />
+                            <br>
+                            <span class="dot" style="background-color:gray;width:25px;height:25px;" if="{item.status.reviewing=='on'}"></span>
+                            <span class="dot" style="background-color:yellow;width:25px;height:25px;" if="{item.status.intendsToBid=='on'}"></span>
+                            <span class="dot" style="background-color:green;width:25px;height:25px;" if="{item.status.bidded=='on'}"></span>
+                            <span class="dot" style="background-color:red;width:25px;height:25px;" if="{item.status.notBidding=='on'}"></span>
+                        </td>
+                        <td style="width:300">
+                            <input class="form-control" onChange="{updateValue(item.vendor, 'name')}" ref="vendorName"
+                                placeholder="Vendor Name" value={item.vendor.name} />
+                            <input class="form-control" onChange="{updateValue(item.vendor, 'phone')}" ref="vendorPhone"
+                                placeholder="Phone number" value={item.vendor.phone} />
+                            <input class="form-control" onChange="{updateValue(item.vendor, 'contactName')}" placeholder="Contact Name"
+                                value={item.vendor.contactName} />
+                            <input class="form-control" onChange="{updateValue(item.vendor, 'email')}" placeholder="Email"
+                                value={item.vendor.email} />
+                            <button class="btn btn-success" style="margin-top:10px;width:100%" onClick="{() => onboardUser(item)}">Onboard user</button>
+                        </td>
+                        <td style="width:300px">
+                            <input class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'date')}" ref="mostRecentCall"
+                                placeholder="Date" value={item.calls[item.calls.length - 1].date} />
+                            <input class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'time')}"
+                                type="time" placeholder="Time" value={item.calls[item.calls.length - 1].time} />
+                            <textarea class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'note')}"
+                                placeholder="Note" value={item.calls[item.calls.length - 1].note} />
+                            <input type="button" onClick="{() => addCall(item)}" value="Add call">
+                        </td>
+                        <td>
+                            <center>
+                                <input onClick="{updateValue(item, 'needsFollowUp')}" type="checkbox" checked="{item.needsFollowUp}">
+                            </center>
+                        </td>
+                        <td style="text-align:left;">
+                            <div>
+                                <input name="status" onChange="{()=>updateStatus(item, 'reviewing')}" type="radio" checked="{item.status.reviewing}">
+                                <b>Reviewing</b>
+                                <span class="dot" style="background-color:gray"></span>
+                            </div>
+                            <div>
+                                <input name="status" onChange="{()=>updateStatus(item, 'intendsToBid')}" type="radio" checked="{item.status.intendsToBid}">
+                                <b>Intends to bid</b>
+                                <span class="dot" style="background-color:yellow"></span>
+                            </div>
+                            <div>
+                                <input name="status" onChange="{()=>updateStatus(item, 'bidded')}" type="radio" checked="{item.status.bidded}">
+                                <b>Bidded</b>
+                                <span class="dot" style="background-color:green"></span>
+                            </div>
+                            <div>
+                                <input name="status" onChange="{()=>updateStatus(item, 'notBidding')}" type="radio" checked="{item.status.notBidding}">
+                                <b>Not bidding</b>
+                                <span class="dot" style="background-color:red"></span>
+                            </div>
+                        </td>
+                        <td style="width:300px">
+                            <callColumn calls="{item.calls}" />
+                        </td>
+                        <script>
+                            getLastModified(){
+                                return lastModified.toLocaleDateString("en-US") + " " + lastModified.toLocaleTimeString();
                             }
-                            saveItems();
-                        }
-                        this.update();
-                    }
-
-                    updateStatus(item, status){
-                        item.status = {}
-                        item.status[status] = "on";
-                        saveItems();
-                        this.update();
-                    }
-
-                    onboardUser(item){
-                        var data = {
-                            email: item.vendor.email,
-                            projects: item.tags.map(x=> getTag(x).href),
-                            full_name: item.vendor.contactName,
-                            company_name: item.vendor.name,
-                            phone: item.vendor.phone,
-                        }
-
-                        $.get("https://testsite.astorian.com/wp-json/crm/add-user", data, (result) =>{
-                            alert(result);
-                        });
-                    }
-                    addCall(item){
-                        item.calls.push({ date: "", time: "", note: "" });
-                        this.update();
-                        saveItems();
-                    }
-                    hideItem(item){
-                        item.visible = false;
-                        this.update();
-                    }
-
-                    deleteItem(item){
-                        var index = globalInfo.items.findIndex(x => x.id == item.id);
-                        if (index != -1) {
-                            globalInfo.items.splice(index, 1);
-                        }
-                        saveItems();
-                    }
-
-                    selectedTags = [];
-
-                    filter(by) {
-                        globalInfo.items.forEach(e => {
-                            e.visible = true;
-                        });
-                        if (by == "tag") {
-                            var tag = $("#tagFilter").val();
-                            if (tag != "") {
-                                globalInfo.items.forEach(el => {
-                                    if (el.tags.find(t => getTag(t).name == tag) != undefined)
-                                        el.visible = true;
-                                    else
-                                        el.visible = false;
-                                })
-                            }
-                        } else if (by == "deadline") {
-                            var deadline = $("#deadlineFilter").val();
-                            globalInfo.items.forEach(el => {
-                                if (el.tags.find(t => new Date(getTag(t).deadline).getTime() <= new Date(deadline).getTime()) != undefined)
-                                    el.visible = true;
-                                else
-                                    el.visible = false;
-                            })
-                        }
-
-                        this.update();
-                    }
-
-                    clearFilter(){
-                        globalInfo.items.forEach(element => {
-                            element.visible = true;
-                        });
-                        $(this.refs.date).val("");
-                        $(this.refs.tags).val("");
-                        this.update();
-                    }
-
-                    filterFollowUp(e){
-                        this.clearFilter();
-                        globalInfo.items.forEach(item => {
-                            if (e.target.checked == true && item.needsFollowUp == true)
-                                item.visible = true;
-                            else if (e.target.checked == true && item.needsFollowUp == false)
-                                item.visible = false;
-                            else
-                                item.visible = true;
-                        });
-
-                        this.update;
-                    }
-                    addEntry(){
-                        var defaultItem = {
-                            id: getLastId(),
-                            tags: [],
-                            deadline: "",
-                            vendor: {
-                                name: "",
-                                phone: "",
-                                contactName: "",
-                                email: ""
-                            },
-                            needsFollowUp: false,
-                            status: {},
-                            calls: [
-                                { date: "", time: "", note: "" },
-                            ],
-                            note: "",
-                            visible: true
-                        };
-
-                        if (JSON.stringify(globalInfo.items[globalInfo.items.length - 1]) === JSON.stringify(defaultItem)) return;
-                        else defaultItem.id++;
-                        globalInfo.items.push(defaultItem);
-                        saveItems();
-                        this.update();
-                    }
-                    this.on("mount", () => {
-                        $(this.refs.tags).on('keyup', (e) => this.filter('tag'));
-                        $(this.refs.date).on('change', (e) => this.filter('deadline'));
-                        $(this.refs.tags).autocomplete({
-                            source: globalInfo.tags,
-                            minLength: 0,
-                            select: function (a, b) {
-                                $(this).val(b.item.value);
-                                $(this).keyup();
-                            }
-                        }).focus(function () {
-                            $(this).keyup();
-                            $(this).autocomplete('search', $(this).val())
-                        });
-
-                        $(this.refs.mostRecentCall).datepicker({
-                            onSelect: function (data) {
-                                $(this).get(0).dispatchEvent(new Event('change'));
-                            }
-                        });
-
-                        $(this.refs.date).datepicker({
-                            onSelect: function (data) {
-                                $(this).val(data);
-                                $(this).change();
-                            }
-                        });
-
-                        $(this.refs.mostRecentCall).datepicker({
-                            onSelect: function (data) {
-                                $(this).get(0).dispatchEvent(new Event('change'));
-                            }
-                        });
-                        $("td:nth-child(2),td:nth-child(3), td:nth-child(4)")
-                            .css({
-                                position: "relative"
-                            })
-                            .prepend("<div class='resizer'></div>")
-                            .resizable({
-                                resizeHeight: false,
-                                handleSelector: "",
-                                onDragStart: function (e, $el, opt) {
-                                    if (!$(e.target).hasClass("resizer"))
-                                        return false;
-                                    return true;
-                                }
-                            });
-                    })
-                    this.on("update", () => {
-                        $(this.refs.tags).autocomplete({
-                            source: getTagsName()
-                        });
-
-                        $(this.refs.mostRecentCall).datepicker({
-                            onSelect: function (data) {
-                                $(this).get(0).dispatchEvent(new Event('change'));
-                            }
-                        });
-
-                        $(this.refs.mostRecentCall).datepicker({
-                            onSelect: function (data) {
-                                $(this).get(0).dispatchEvent(new Event('change'));
-                            }
-                        });
-                        $("td:nth-child(2),td:nth-child(3), td:nth-child(4)")
-                            .css({
-                                position: "relative"
-                            })
-                            .prepend("<div class='resizer'></div>")
-                            .resizable({
-                                resizeHeight: false,
-                                handleSelector: "",
-                                onDragStart: function (e, $el, opt) {
-                                    if (!$(e.target).hasClass("resizer"))
-                                        return false;
-                                    return true;
-                                }
-                            });
-                    })
-                    tick() {
-                        $.post("utils.php", { requestType: "lastModified", token: new Date().getTime() }, (data) => {
-                            modifiedDate = new Date(data);
-                            if (lastModified == undefined || !(modifiedDate.getTime() === lastModified.getTime())) {
-                                $.post("utils.php", { requestType: "read", file: "records.json", token: new Date().getTime() }, (data) => {
-                                    updatedInfo = JSON.parse(data);
-                                    globalInfo.tags = updatedInfo.tags;
-                                    if(globalInfo.items.length == 0) updatedInfo.items.forEach(x=> x.visible = true);
-                                    updatedItems = updatedInfo.items;
-                                    var items = globalInfo.items;
-                                    for (var i = 0; i < updatedItems.length; i++) {
-                                        if (i >= items.length) {
-                                            items.push(updatedItems[i]);
-                                        } else {
-                                            while (updatedItems[i].id != items[i].id) {
-                                                items.splice(i, 1);
-                                            }
-                                            var visibility = items[i].visible;
-                                            Object.keys(items[i]).forEach(function (key) {
-                                                items[i][key] = updatedItems[i][key];
-                                            });
-                                            items[i].visible = visibility;
-                                        }
+                            updateValue(a, b){
+                                return function (event, c) {
+                                    if (event.target.type == "checkbox") {
+                                        a[b] = event.target.checked;
+                                    } else {
+                                        a[b] = event.target.value.trim();
                                     }
-                                    console.log("Received changes")
-                                    this.update();
+                                    saveItems();
+                                }
+                                this.update();
+                            }
 
-                                    //Dirty trick to trigger datepicker after rendering of page
-                                    $(this.refs.mostRecentCall).datepicker({
-                                        onSelect: function (data) {
-                                            $(this).get(0).dispatchEvent(new Event('change'));
+                            updateStatus(item, status){
+                                item.status = {}
+                                item.status[status] = "on";
+                                saveItems();
+                                this.update();
+                            }
+
+                            onboardUser(item){
+                                var data = {
+                                    email: item.vendor.email,
+                                    projects: item.tags.map(x=> getTag(x).href),
+                                    full_name: item.vendor.contactName,
+                                    company_name: item.vendor.name,
+                                    phone: item.vendor.phone,
+                                }
+
+                                $.get("https://testsite.astorian.com/wp-json/crm/add-user", data, (result) =>{
+                                    alert(result);
+                                });
+                            }
+                            addCall(item){
+                                item.calls.push({ date: "", time: "", note: "" });
+                                this.update();
+                                saveItems();
+                            }
+                            hideItem(item){
+                                item.visible = false;
+                                this.update();
+                            }
+
+                            deleteItem(item){
+                                var index = globalInfo.items.findIndex(x => x.id == item.id);
+                                if (index != -1) {
+                                    globalInfo.items.splice(index, 1);
+                                }
+                                saveItems();
+                            }
+
+                            selectedTags = [];
+
+                            filter(by) {
+                                globalInfo.items.forEach(e => {
+                                    e.visible = true;
+                                });
+                                if (by == "tag") {
+                                    var tag = $("#tagFilter").val();
+                                    if (tag != "") {
+                                        globalInfo.items.forEach(el => {
+                                            if (el.tags.find(t => getTag(t).name == tag) != undefined)
+                                                el.visible = true;
+                                            else
+                                                el.visible = false;
+                                        })
+                                    }
+                                } else if (by == "deadline") {
+                                    var deadline = $("#deadlineFilter").val();
+                                    globalInfo.items.forEach(el => {
+                                        if (el.tags.find(t => new Date(getTag(t).deadline).getTime() <= new Date(deadline).getTime()) != undefined)
+                                            el.visible = true;
+                                        else
+                                            el.visible = false;
+                                    })
+                                }
+
+                                this.update();
+                            }
+
+                            clearFilter(){
+                                globalInfo.items.forEach(element => {
+                                    element.visible = true;
+                                });
+                                $(this.refs.date).val("");
+                                $(this.refs.tags).val("");
+                                this.update();
+                            }
+
+                            filterFollowUp(e){
+                                this.clearFilter();
+                                globalInfo.items.forEach(item => {
+                                    if (e.target.checked == true && item.needsFollowUp == true)
+                                        item.visible = true;
+                                    else if (e.target.checked == true && item.needsFollowUp == false)
+                                        item.visible = false;
+                                    else
+                                        item.visible = true;
+                                });
+
+                                this.update;
+                            }
+                            addEntry(){
+                                var defaultItem = {
+                                    id: getLastId(),
+                                    tags: [],
+                                    deadline: "",
+                                    vendor: {
+                                        name: "",
+                                        phone: "",
+                                        contactName: "",
+                                        email: ""
+                                    },
+                                    needsFollowUp: false,
+                                    status: {},
+                                    calls: [
+                                        { date: "", time: "", note: "" },
+                                    ],
+                                    note: "",
+                                    visible: true
+                                };
+
+                                if (JSON.stringify(globalInfo.items[globalInfo.items.length - 1]) === JSON.stringify(defaultItem)) return;
+                                else defaultItem.id++;
+                                globalInfo.items.push(defaultItem);
+                                saveItems();
+                                this.update();
+                            }
+                            this.on("mount", () => {
+                                $(this.refs.tags).on('keyup', (e) => this.filter('tag'));
+                                $(this.refs.date).on('change', (e) => this.filter('deadline'));
+                                $(this.refs.tags).autocomplete({
+                                    source: globalInfo.tags,
+                                    minLength: 0,
+                                    select: function (a, b) {
+                                        $(this).val(b.item.value);
+                                        $(this).keyup();
+                                    }
+                                }).focus(function () {
+                                    $(this).keyup();
+                                    $(this).autocomplete('search', $(this).val())
+                                });
+
+                                $(this.refs.mostRecentCall).datepicker({
+                                    onSelect: function (data) {
+                                        $(this).get(0).dispatchEvent(new Event('change'));
+                                    }
+                                });
+
+                                $(this.refs.date).datepicker({
+                                    onSelect: function (data) {
+                                        $(this).val(data);
+                                        $(this).change();
+                                    }
+                                });
+
+                                $(this.refs.mostRecentCall).datepicker({
+                                    onSelect: function (data) {
+                                        $(this).get(0).dispatchEvent(new Event('change'));
+                                    }
+                                });
+                                $("td:nth-child(2),td:nth-child(3), td:nth-child(4)")
+                                    .css({
+                                        position: "relative"
+                                    })
+                                    .prepend("<div class='resizer'></div>")
+                                    .resizable({
+                                        resizeHeight: false,
+                                        handleSelector: "",
+                                        onDragStart: function (e, $el, opt) {
+                                            if (!$(e.target).hasClass("resizer"))
+                                                return false;
+                                            return true;
                                         }
                                     });
-                                    $("td:nth-child(2),td:nth-child(3), td:nth-child(4)")
-                                        .css({
-                                            position: "relative"
-                                        })
-                                        .prepend("<div class='resizer'></div>")
-                                        .resizable({
-                                            resizeHeight: false,
-                                            handleSelector: "",
-                                            onDragStart: function (e, $el, opt) {
-                                                if (!$(e.target).hasClass("resizer"))
-                                                    return false;
-                                                return true;
-                                            }
-                                        });
+                            })
+                            this.on("update", () => {
+                                $(this.refs.tags).autocomplete({
+                                    source: getTagsName()
                                 });
-                                lastModified = modifiedDate;
+
+                                $(this.refs.mostRecentCall).datepicker({
+                                    onSelect: function (data) {
+                                        $(this).get(0).dispatchEvent(new Event('change'));
+                                    }
+                                });
+
+                                $(this.refs.mostRecentCall).datepicker({
+                                    onSelect: function (data) {
+                                        $(this).get(0).dispatchEvent(new Event('change'));
+                                    }
+                                });
+                                $("td:nth-child(2),td:nth-child(3), td:nth-child(4)")
+                                    .css({
+                                        position: "relative"
+                                    })
+                                    .prepend("<div class='resizer'></div>")
+                                    .resizable({
+                                        resizeHeight: false,
+                                        handleSelector: "",
+                                        onDragStart: function (e, $el, opt) {
+                                            if (!$(e.target).hasClass("resizer"))
+                                                return false;
+                                            return true;
+                                        }
+                                    });
+                            })
+                            tick() {
+                                $.post("utils.php", { requestType: "lastModified", token: new Date().getTime() }, (data) => {
+                                    modifiedDate = new Date(data);
+                                    if (lastModified == undefined || !(modifiedDate.getTime() === lastModified.getTime())) {
+                                        $.post("utils.php", { requestType: "read", file: "records.json", token: new Date().getTime() }, (data) => {
+                                            updatedInfo = JSON.parse(data);
+                                            globalInfo.tags = updatedInfo.tags;
+                                            if(globalInfo.items.length == 0) updatedInfo.items.forEach(x=> x.visible = true);
+                                            updatedItems = updatedInfo.items;
+                                            var items = globalInfo.items;
+                                            for (var i = 0; i < updatedItems.length; i++) {
+                                                if (i >= items.length) {
+                                                    items.push(updatedItems[i]);
+                                                } else {
+                                                    while (updatedItems[i].id != items[i].id) {
+                                                        items.splice(i, 1);
+                                                    }
+                                                    var visibility = items[i].visible;
+                                                    Object.keys(items[i]).forEach(function (key) {
+                                                        items[i][key] = updatedItems[i][key];
+                                                    });
+                                                    items[i].visible = visibility;
+                                                }
+                                            }
+                                            console.log("Received changes")
+                                            this.update();
+
+                                            //Dirty trick to trigger datepicker after rendering of page
+                                            $(this.refs.mostRecentCall).datepicker({
+                                                onSelect: function (data) {
+                                                    $(this).get(0).dispatchEvent(new Event('change'));
+                                                }
+                                            });
+                                            $("td:nth-child(2),td:nth-child(3), td:nth-child(4)")
+                                                .css({
+                                                    position: "relative"
+                                                })
+                                                .prepend("<div class='resizer'></div>")
+                                                .resizable({
+                                                    resizeHeight: false,
+                                                    handleSelector: "",
+                                                    onDragStart: function (e, $el, opt) {
+                                                        if (!$(e.target).hasClass("resizer"))
+                                                            return false;
+                                                        return true;
+                                                    }
+                                                });
+                                        });
+                                        lastModified = modifiedDate;
+                                    }
+                                });
+
                             }
-                        });
+                            var timer = setInterval(this.tick, 100);
 
-                    }
-                    var timer = setInterval(this.tick, 100);
+                            changeView(){
+                                var selectedView = $("#viewSelect").val();
+                                globalView = selectedView;
+                                this.loadView();
+                            }
 
-                    changeView(){
-                        var selectedView = $("#viewSelect").val();
-                        globalView = selectedView;
-                        this.loadView();
-                    }
-
-                    loadView(){
-                        switch (globalView) {
-                            case "CRM":
-                            case "Overview":
-                                this.clearFilter();
-                                break;
-                            case "Archive":
-                                this.loadArchive(this.update);
-                                break;
-                        }
-                    }
-                    //TO DO update as paramater is tricky.. this should work without it
-                    loadArchive(update) {
-                        $.post("utils.php", { requestType: "read", file: "archive.json", token: new Date().getTime() }, function (data) {
-                            archiveInfo = JSON.parse(data);
-                            update();
-                        });
-                    }
+                            loadView(){
+                                switch (globalView) {
+                                    case "CRM":
+                                    case "Overview":
+                                        this.clearFilter();
+                                        break;
+                                    case "Archive":
+                                        this.loadArchive(this.update);
+                                        break;
+                                }
+                            }
+                            //TO DO update as paramater is tricky.. this should work without it
+                            loadArchive(update) {
+                                $.post("utils.php", { requestType: "read", file: "archive.json", token: new Date().getTime() }, function (data) {
+                                    archiveInfo = JSON.parse(data);
+                                    update();
+                                });
+                            }
 
 
-                </script>
-            </tr>
-        </tbody>
-    </table>
-
+                        </script>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
     <table class="table" style="margin-top: 200px" if="{globalView == 'Overview'}">
         <thead>
             <tr>
