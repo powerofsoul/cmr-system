@@ -50,8 +50,7 @@
                 <th scope="col">Vendor</th>
                 <th scope="col">Most recent call</th>
                 <th scope="col">Needs Follow Up</th>
-                <th scope="col">Intends to bid</th>
-                <th scope="col">Bidded</th>
+                <th scope="col">Status</th>
                 <th scope="col">Previous calls</th>
             </tr>
         </thead>
@@ -68,10 +67,11 @@
                         placeholder="Vendor Name" value={item.vendor.name} />
                     <input class="form-control" onChange="{updateValue(item.vendor, 'phone')}" ref="vendorPhone"
                         placeholder="Phone number" value={item.vendor.phone} />
-                    <input class="form-control" onChange="{updateValue(item.vendor, 'contactName')}" placeholder="Contract Name"
+                    <input class="form-control" onChange="{updateValue(item.vendor, 'contactName')}" placeholder="Contact Name"
                         value={item.vendor.contactName} />
                     <input class="form-control" onChange="{updateValue(item.vendor, 'email')}" placeholder="Email"
                         value={item.vendor.email} />
+                    <button class="btn btn-success" style="margin-top:10px;width:100%" onClick="{() => onboardUser(item)}">Onboard user</button>
                 </td>
                 <td style="width:500px">
                     <input class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'date')}" ref="mostRecentCall"
@@ -84,15 +84,26 @@
                 </td>
                 <td>
                     <center>
-                        <input onClick="{updateValue(item, 'needsFollowUp')}" type="checkbox" checked="{item.needsFollowUp}" </center>
+                        <input onClick="{updateValue(item, 'needsFollowUp')}" type="checkbox" checked="{item.needsFollowUp}">
+                    </center>
                 </td>
-                <td>
-                    <center>
-                        <input onClick="{updateValue(item, 'intendsToBid')}" type="checkbox" checked="{item.intendsToBid}" </center>
-                </td>
-                <td>
-                    <center>
-                        <input onClick="{updateValue(item, 'bidded')}" type="checkbox" checked="{item.bidded}" </center>
+                <td style="text-align:left;">
+                    <div>
+                        <input name="status" onChange="{()=>updateStatus(item, 'reviewing')}" type="radio" checked="{item.status.reviewing}">
+                        <b>Reviewing</b>
+                    </div>
+                    <div>
+                        <input name="status" onChange="{()=>updateStatus(item, 'intendsToBid')}" type="radio" checked="{item.status.intendsToBid}">
+                        <b>Intends to bid</b>
+                    </div>
+                    <div>
+                        <input name="status" onChange="{()=>updateStatus(item, 'bidded')}" type="radio" checked="{item.status.bidded}">
+                        <b>Bidded</b>
+                    </div>
+                    <div>
+                        <input name="status" onChange="{()=>updateStatus(item, 'notBidding')}" type="radio" checked="{item.status.notBidding}">
+                        <b>Not bidding</b>
+                    </div>
                 </td>
                 <td style="width:300px">
                     <callColumn calls="{item.calls}" />
@@ -111,6 +122,27 @@
                             saveItems();
                         }
                         this.update();
+                    }
+
+                    updateStatus(item, status){
+                        item.status = {}
+                        item.status[status] = "on";
+                        saveItems();
+                        this.update();
+                    }
+
+                    onboardUser(item){
+                        var data = {
+                            email: item.vendor.email,
+                            projects: item.tags.map(x=> getTag(x).href),
+                            full_name: item.vendor.contactName,
+                            company_name: item.vendor.name,
+                            phone: item.vendor.phone,
+                        }
+
+                        $.get("https://testsite.astorian.com/wp-json/crm/add-user", data, (result) =>{
+                            alert(result);
+                        });
                     }
                     addCall(item){
                         item.calls.push({ date: "", time: "", note: "" });
@@ -192,9 +224,8 @@
                                 contactName: "",
                                 email: ""
                             },
-                            intendsToBid: false,
-                            bidded: false,
                             needsFollowUp: false,
+                            status: {},
                             calls: [
                                 { date: "", time: "", note: "" },
                             ],
