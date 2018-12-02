@@ -10,9 +10,9 @@
                 <div class="col">
                     Viewing:
                     <br>
-                    <button onClick="{()=> changeView('CRM')}">CRM</button>
-                    <button onClick="{()=> changeView('Overview')}">Overview</button>
-                    <button onClick="{()=> changeView('Archive')}">Archive</button>
+                    <button class="btn {btn-primary: globalView=='CRM'}" onClick="{()=> changeView('CRM')}">CRM</button>
+                    <button class="btn {btn-primary: globalView=='Overview'}" onClick="{()=> changeView('Overview')}">Overview</button>
+                    <button class="btn {btn-primary: globalView=='Archive'}" onClick="{()=> changeView('Archive')}">Archive</button>
                 </div>
                 <div class="col"></div>
                 <div class="col"></div>
