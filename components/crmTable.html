@@ -96,8 +96,8 @@
                                 value={item.vendor.contactName} />
                             <input class="form-control" onChange="{updateValue(item.vendor, 'email')}" placeholder="Email"
                                 value={item.vendor.email} />
-                            <button class="btn btn-success full-width" onClick="{() => onboardUser(item)}">Onboard user</button>
-                        </td>
+                            <button class="btn {btn-success: item.vendor.name.replace(/\s/g,"") != "" && item.vendor.email.replace(/\s/g,"") != "" && item.vendor.contactName.replace(/\s/g,"") != "" } full-width" onClick="{() => onboardUser(item)}">Onboard user</button>
+                        </td> 
                         <td style="width:300px">
                             <input class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'date')}" ref="mostRecentCall"
                                 placeholder="Date" value={item.calls[item.calls.length - 1].date} />
@@ -105,7 +105,7 @@
                                 type="time" placeholder="Time" value={item.calls[item.calls.length - 1].time} />
                             <textarea class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'note')}"
                                 placeholder="Note" value={item.calls[item.calls.length - 1].note} />
-                            <button class="btn btn-secondary full-width" onClick="{() => addCall(item)}">Add call</button>
+                            <button class="btn btn-secondary full-width" onClick="{() => addCall(item)}">Move to previous call</button>
                         </td>
                         <td>
                             <center>
@@ -161,6 +161,10 @@
                             }
 
                             onboardUser(item){
+                                if(item.vendor.name.replace(/\s/g,"") == "" || item.vendor.email.replace(/\s/g,"") == "" || item.vendor.contactName.replace(/\s/g,"") == ""){
+                                    alert("Be sure to complete vendor name, contact name, email");
+                                    return;
+                                }
                                 var data = {
                                     email: item.vendor.email,
                                     projects: item.tags.map(x=> getTag(x).href),
