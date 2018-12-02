@@ -1,26 +1,22 @@
 <crmTable>
     <div style="background-color:#f4f4f4;">
-        <div class="container-full" style="margin-left:30;margin-right: 30">
+        <div class="container-full header">
             <div class="row">
-                <div class="col"></div>
                 <div class="col">
-                    Viewing:
-                    <select class="custom-select" id="viewSelect" onChange={changeView}>
-                        <option selected>CRM</option>
-                        <option>Overview</option>
-                        <option>Archive</option>
-                    </select>
-                </div>
-            </div>
-            <div class="row">
-                
-                <div class="col">
-                     <span>Latest update:</span>
+                     <b>Last updated:</b>
+                     <br>
                       {getLastModified()}
                 </div>
                 <div class="col">
+                    Viewing:
+                    <br>
+                    <button onClick="{()=> changeView('CRM')}">CRM</button>
+                    <button onClick="{()=> changeView('Overview')}">Overview</button>
+                    <button onClick="{()=> changeView('Archive')}">Archive</button>
                 </div>
-            </div>
+                <div class="col"></div>
+                <div class="col"></div>
+                <div class="col"></div>
         </div>
     </div>
     <div class="crm-view" if="{globalView == 'CRM'}">
@@ -404,8 +400,7 @@
                             }
                             var timer = setInterval(this.tick, 100);
 
-                            changeView(){
-                                var selectedView = $("#viewSelect").val();
+                            changeView(selectedView){
                                 globalView = selectedView;
                                 this.loadView();
                             }
@@ -428,15 +423,13 @@
                                     update();
                                 });
                             }
-
-
                         </script>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
-    <table class="table" style="margin-top: 200px" if="{globalView == 'Overview'}">
+    <table class="table" if="{globalView == 'Overview'}">
         <thead>
             <tr>
                 <th scope="col">Action</th>
@@ -559,7 +552,7 @@
 
     </table>
 
-    <table class="table" style="margin-top:200px" if="{globalView == 'Archive'}">
+    <table class="table" if="{globalView == 'Archive'}">
             <thead>
                     <tr>
                         <th scope="col">Action</th>
@@ -608,8 +601,7 @@
                     </script>
                 </tbody>
     </table>
-    <div style="margin-top:200px" if="{globalView == 'ArchivedTag'}">
-        
+    <div if="{globalView == 'ArchivedTag'}">
         <button type="button" onclick="{()=>changeView('ArchiveTag')}" class="btn btn-primary">&lt;-Back to Archive List</button>
         <table class="table" >
                 <thead>

@@ -59,3 +59,8 @@ body{
 .side-menu-row{
     margin-top:15px;
 }
+
+.header{
+    padding:20px;
+    background-color:white;
+}
