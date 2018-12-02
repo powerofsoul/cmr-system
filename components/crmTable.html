@@ -856,17 +856,17 @@
 </crmTable>
 
 <tagInput>
-    <div class="dropdown" style="text-align:center">
+    <div class="dropdown" style="text-align:center" if={opts.tags.length == 0}>
         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
             aria-haspopup="true" aria-expanded="false">
             Add tag
         </button>
-        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" >
             <a class="dropdown-item" onClick="{createTag}">Create New +</a>
             <a class="dropdown-item" each={tag, index in globalInfo.tags} onclick="{()=> add(index)}" if="{!tag.archived}">{tag.name}</a>
         </div>
     </div>
-    <ul class="list-group list-group-flush" style="max-height: 150px; overflow-y: scroll;" width="150px">
+    <ul class="list-group list-group-flush" >
         <li class="list-group-item" each={tag in opts.tags}>
             <tag val={getTag(tag)} index={tag} remove={ ()=> remove(tag)} />
         </li>
