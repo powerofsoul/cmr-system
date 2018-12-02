@@ -8,7 +8,7 @@
                       {getLastModified()}
                 </div>
                 <div class="col">
-                    Viewing:
+                    <b>Viewing:</b>
                     <br>
                     <button class="btn {btn-primary: globalView=='CRM'}" onClick="{()=> changeView('CRM')}">CRM</button>
                     <button class="btn {btn-primary: globalView=='Overview'}" onClick="{()=> changeView('Overview')}">Overview</button>
@@ -41,7 +41,7 @@
                     <h4>Hidden rows</h4>
                 </div>
                 <div class="side-menu-row">
-                    <input type="checkbox"> Show Hidden
+                    <input type="checkbox" id="showHiddenCheckBox" onClick="{() => showHidden()}"> Show Hidden
                 </div>
                 <div class="side-menu-row">
                     <h4>Add</h4>
@@ -73,10 +73,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr each={ item in globalInfo.items } if={item.visible}>
-                        <td style="text-align: center">{item.id}
-                            <br>
-                            <input type="button" class="btn btn-danger" value="Delete" onclick="{()=> deleteItem(item)}" /></td>
+                    <tr each={ item in globalInfo.items } if={item.visible && (!item.hidden || opts.showHidden)}>>
+                        <td style="text-align: center">
+                            {item.id}<br>
+                             <input type="button" class="btn btn-success btn-block" value="Show" onclick="{()=> setHiddenStatus(item, false)}"  if={item.hidden}/><br>
+                            <input type="button" class="btn btn-primary btn-block" value="Hide" onclick="{()=> setHiddenStatus(item, true)}"  if={!item.hidden}/><br>
+                            <input type="button" class="btn btn-outline-danger btn-block" value="Delete" onclick="{()=> deleteItem(item)}" /></td>
                         <td>
                             <tagInput tags={item.tags} itemId={item.id} />
                             <br>
@@ -176,9 +178,15 @@
                                 this.update();
                                 saveItems();
                             }
-                            hideItem(item){
-                                item.visible = false;
+                            setHiddenStatus(item, value){
+                                item.hidden = value;
+                                saveItems();
                                 this.update();
+                            }
+
+                            showHidden(){
+                               opts.showHidden = $("#showHiddenCheckBox").prop('checked');
+                               this.update();
                             }
 
                             deleteItem(item){
