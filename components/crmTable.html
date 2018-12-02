@@ -171,7 +171,7 @@
                                     phone: item.vendor.phone,
                                 }
 
-                                $.get("https://testsite.astorian.com/wp-json/crm/add-user", data, (result) =>{
+                                $.get("/wp-json/crm/add-user", data, (result) =>{
                                     alert(result);
                                 });
                             }
