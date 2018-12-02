@@ -64,3 +64,11 @@ body{
     padding:20px;
     background-color:white;
 }
+
+.full-width{
+    width:100%;
+}
+
+.full-width button{
+    margin-top:10px;
+}
