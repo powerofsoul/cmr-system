@@ -20,3 +20,13 @@ th, td{
 .list-group-item{
     padding: 0;
 }
+
+.dot {
+    height: 15px;
+    width: 15px;
+    border-radius: 50%;
+    border-color:black;
+    border-width:1px;
+    border-style:solid;
+    display: inline-block;
+}
