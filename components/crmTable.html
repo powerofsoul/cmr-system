@@ -80,7 +80,7 @@
                             <input type="button" class="btn btn-primary btn-block" value="Hide" onclick="{()=> setHiddenStatus(item, true)}"  if={!item.hidden}/><br>
                             <input type="button" class="btn btn-outline-danger btn-block" value="Delete" onclick="{()=> deleteItem(item)}" /></td>
                         <td>
-                            <tagInput tags={item.tags} itemId={item.id} />
+                            <tagInput  item={item} />
                             <br>
                             <span class="dot" style="background-color:gray;width:25px;height:25px;" if="{item.status.reviewing=='on'}"></span>
                             <span class="dot" style="background-color:yellow;width:25px;height:25px;" if="{item.status.intendsToBid=='on'}"></span>
@@ -96,7 +96,7 @@
                                 value={item.vendor.contactName} />
                             <input class="form-control" onChange="{updateValue(item.vendor, 'email')}" placeholder="Email"
                                 value={item.vendor.email} />
-                            <button class="btn {btn-success: item.vendor.name.replace(/\s/g,'') != '' && item.vendor.email.replace(/\s/g,'') != '' && item.vendor.contactName.replace(/\s/g,'') != '' && item.tags.length != 0 } full-width" onClick="{() => onboardUser(item)}">Onboard user</button>
+                            <button class="btn {btn-success: item.vendor.name.replace(/\s/g,'') != '' && item.vendor.email.replace(/\s/g,'') != '' && item.vendor.contactName.replace(/\s/g,'') != '' && item.tags.length != undefined } full-width" onClick="{() => onboardUser(item)}">Onboard user</button>
                         </td> 
                         <td style="width:300px">
                             <input class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'date')}" ref="mostRecentCall"
@@ -167,7 +167,7 @@
                                 }
                                 var data = {
                                     email: item.vendor.email,
-                                    projects: item.tags.map(x=> getTag(x).href),
+                                    projects: getTag(item.tag),
                                     full_name: item.vendor.contactName,
                                     company_name: item.vendor.name,
                                     phone: item.vendor.phone,
@@ -518,31 +518,17 @@
                             archivedObjectPreview["intendsToBid"] = [];
                         archivedObjectPreview["archivedOn"] = archivedOn;
 
-                        var removeTag = true;
                         var itemsToBeRemoved = [];
 
                         for (var i = 0; i < globalInfo.items.length; i++) {
                             var currentItem = globalInfo.items[i];
-                            if (currentItem.tags.indexOf(tag) == -1) continue;
-                            var itemShouldBeDeleted = currentItem.tags.find(x => getTag(x).archived == false) == undefined;
-                            if (itemShouldBeDeleted) {
-                                itemsToBeRemoved.push(i);
-                            } else {
-                                removeTag = false;
-                            }
+                            if (currentItem.tag != tag) continue;
+                            itemsToBeRemoved.push(i);
                         }
-
-                        var tagsToRemove = [];
-                        for (var key in globalInfo.tags) {
-                            if (globalInfo.items.filter(i => i.tags.indexOf(key) >= 0).every(x => x.tags.every(t => getTag(t).archived)))
-                                tagsToRemove.push(key);
-                        }
-
-                        tagsToRemove.forEach(tag => {
-                            delete globalInfo.tags[tag];
-                        });
-
+  
+                        delete globalInfo.tags[tag];
                         itemsToBeRemoved.sort().reverse();
+
                         console.log(itemsToBeRemoved);
                         itemsToBeRemoved.forEach(e => {
                             globalInfo.items.splice(e, 1);
@@ -582,8 +568,7 @@
                             <button type="button" class="btn btn-dark" onClick="{()=> viewCalls(info.id)}">View all calls</button>
                         </td>
                         <td>
-                            <a href={info.tag.href}>{info.tag.name}</a>
-                            <a>|{info.tag.deadline}</a>
+                            
                         </td>
                         <td>
                             <center>{info.bids.length}</center>
@@ -733,6 +718,7 @@
                                     <input id="addTagModalName" class="form-control" placeholder="Project Name">
                                     <input id="addTagModalDeadline" class="form-control" placeholder="Deadline">
                                     <input id="addTagModalHref" class="form-control" placeholder="HREF">
+                                    <input id="addTagModalProjectManager" class="form-control" placeholder="Project Manager">
                                 </div>
                                 <div class="modal-footer">
                                     <button id="submit" type="button" class="btn btn-primary" onClick={createTag}>Create</button>
@@ -755,6 +741,7 @@
                                     <input id="editTagModalName" class="form-control" placeholder="Project Name">
                                     <input id="editTagModalDeadline" class="form-control" placeholder="Deadline">
                                     <input id="editTagModalHref" class="form-control" placeholder="HREF">
+                                    <input id="editTagModalProjectManager" class="form-control" placeholder="Project Manager">
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-danger mr-auto" onclick="{deleteTag}">Delete</button>
@@ -826,6 +813,8 @@
                             var name = $("#addTagModalName").val();
                             var deadline = $("#addTagModalDeadline").val();
                             var href = $("#addTagModalHref").val();
+                            var projectManager = $("#addTagModalProjectManager").val();
+
                             var archived = false;
                             if (href.indexOf("http://") != 0) href = "http://" + href;
 
@@ -834,10 +823,10 @@
                                 return;
                             }
 
-                            globalInfo.tags[id] = { name: name, deadline: deadline, href: href, archived: archived };
+                            globalInfo.tags[id] = { name: name, deadline: deadline, href: href, projectManager: projectManager, archived: archived };
                             var item = globalInfo.items.find(x => x.id == currentUsedItem);
-                            item.tags.push(id);
-
+                            item.tag = id;
+                            
                             $('#addTagModal').modal('toggle');
 
                             saveItems();
@@ -847,8 +836,8 @@
                             var name = $("#editTagModalName").val();
                             var deadline = $("#editTagModalDeadline").val();
                             var href = $("#editTagModalHref").val();
-
-                            globalInfo.tags[currentUsedItem] = { name: name, deadline: deadline, href: href };
+                            var projectManager = $("#editTagModalProjectManager").val();
+                            globalInfo.tags[currentUsedItem] = { name: name, deadline: deadline, href: href, projectManager: projectManager };
                             saveItems();
                             this.update();
                         }
@@ -869,46 +858,37 @@
 </crmTable>
 
 <tagInput>
-    <div class="dropdown" style="text-align:center" if={opts.tags.length == 0}>
+    <div class="dropdown" style="text-align:center" if={opts.item.tag  == undefined}>
         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
             aria-haspopup="true" aria-expanded="false">
             Add tag
         </button>
         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" >
             <a class="dropdown-item" onClick="{createTag}">Create New +</a>
-            <a class="dropdown-item" each={tag, index in globalInfo.tags} onclick="{()=> add(index)}" if="{!tag.archived}">{tag.name}</a>
+            <a class="dropdown-item" each={tag, key in globalInfo.tags} onclick="{()=> add(key)}" if="{!tag.archived}">{tag.name}</a>
         </div>
     </div>
-    <ul class="list-group list-group-flush" >
-        <li class="list-group-item" each={tag in opts.tags}>
-            <tag val={getTag(tag)} index={tag} remove={ ()=> remove(tag)} />
-        </li>
-    </ul>
+    <tag val={getTag(opts.item.tag)} index={opts.item.tag} remove={remove} if={opts.item.tag != undefined}/>
 
     <script>
-        add(tagIndex){
-            if (this.opts.tags.indexOf(tagIndex) == -1)
-                opts.tags.push(tagIndex);
-            else
-                alert("Tag already exists");
-            this.update();
+        add(key){
+            opts.item.tag = key;
             saveItems();
+            this.update();
         }
         createTag(){
             $("#addTagModalName").val('');
             $("#addTagModalDeadline").datepicker();
             $("#addTagModalDeadline").val('');
             $("#addTagModalHref").val('');
-            currentUsedItem = this.opts.itemid;
+            currentUsedItem = this.opts.item.id;
             $("#addTagModal").modal();
         }
 
-        remove(a){
-            var index = opts.tags.findIndex(x => x == a);
-            if (index > -1)
-                opts.tags.splice(index, 1);
-            this.update();
+        remove(){
+            opts.item.tag = undefined;
             saveItems();
+            this.update();
         }
 
         this.on("mount", () => {
@@ -936,12 +916,11 @@
 
     <script>
         editTag(){
-            var tag = getTag(this.opts.index);
-            $("#editTagModalName").val(tag.name);
+            $("#editTagModalName").val(opts.val.name);
             $("#editTagModalDeadline").datepicker();
-            $('#editTagModalDeadline').datepicker("setDate", new Date(tag.deadline));
-            $("#editTagModalHref").val(tag.href);
-            currentUsedItem = this.opts.index;
+            $('#editTagModalDeadline').datepicker("setDate", new Date(opts.val.deadline));
+            $("#editTagModalHref").val(opts.val.href);
+            currentUsedItem = opts.index;
             $("#editTagModal").modal();
         }
     </script>
