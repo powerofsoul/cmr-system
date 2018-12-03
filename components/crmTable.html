@@ -457,7 +457,8 @@
                 </td>
                 <td>
                     <a href="{tag.href}">{tag.name}</a>|
-                    <span>{tag.deadline}</span>
+                    <span>{tag.deadline}</span><br>
+                    <span>Project Manager:{tag.projectManager}</span>
                 </td>
                 <td>
                     <a>{countBids(tag)}</a>
@@ -479,16 +480,16 @@
 
                 <script>
                     countBids(tag){            
-                        return globalInfo.items.filter(x => x.tags.find(t => JSON.stringify(getTag(t)) === JSON.stringify(tag)) && 'bidded' in x.status).length;
+                        return globalInfo.items.filter(x => JSON.stringify(getTag(x.tag)) === JSON.stringify(tag) && 'bidded' in x.status).length;
                     }
                     getBids(tag){
-                        return globalInfo.items.filter(x => x.tags.find(t => JSON.stringify(getTag(t)) === JSON.stringify(tag)) && 'bidded' in x.status).map(x => x.vendor);
+                        return globalInfo.items.filter(x => JSON.stringify(getTag(x.tag)) === JSON.stringify(tag) && 'bidded' in x.status).map(x => x.vendor);
                     }
                     countIntentions(tag){
-                        return globalInfo.items.filter(x => x.tags.find(t => JSON.stringify(getTag(t)) === JSON.stringify(tag)) && 'intendsToBid' in x.status).length;
+                        return globalInfo.items.filter(x => JSON.stringify(getTag(x.tag)) === JSON.stringify(tag) && 'intendsToBid' in x.status).length;
                     }
                     getIntentions(tag){
-                        return globalInfo.items.filter(x => x.tags.find(t => JSON.stringify(getTag(t)) === JSON.stringify(tag)) && 'intendsToBid' in x.status).map(x => x.vendor);
+                        return globalInfo.items.filter(x => JSON.stringify(getTag(x.tag)) === JSON.stringify(tag) && 'intendsToBid' in x.status).map(x => x.vendor);
                     }
 
                     archiveTag(tag){
@@ -500,8 +501,8 @@
 
                         var archivedObjectPreview = {};
                         archivedObjectPreview["tag"] = globalInfo.tags[tag];
-                        var archivedItems = { items: globalInfo.items.filter(x => x.tags.indexOf(tag) >= 0) }
-                        archivedItems.tags = globalInfo.tags;
+                        var archivedItems = { items: globalInfo.items.filter(x => x.tag == tag) }
+                        archivedItems.tag = globalInfo.tags[tag];
 
                         var bids = archivedItems.items.filter(x => "bidded" in x.status).map(x => x.vendor.name);
                         var intendsToBid = archivedItems.items.filter(x => "intendsToBid" in x.status).map(x => x.vendor.name);
@@ -533,8 +534,6 @@
                         itemsToBeRemoved.forEach(e => {
                             globalInfo.items.splice(e, 1);
                         });
-                        
-                        archivedItems["tag"] = archivedObjectPreview.tag;
 
                         $.post("utils.php", { requestType: "archiveTag", previewTag: archivedObjectPreview, items: archivedItems, id: tag },
                             (data) => {
@@ -568,7 +567,9 @@
                             <button type="button" class="btn btn-dark" onClick="{()=> viewCalls(info.id)}">View all calls</button>
                         </td>
                         <td>
-                            
+                            <a href="{tag.href}">{info.tag.name}</a>|
+                            <span>{info.tag.deadline}</span><br>
+                            <span>Project Manager:{info.tag.projectManager}</span>
                         </td>
                         <td>
                             <center>{info.bids.length}</center>
@@ -912,7 +913,8 @@
     <button class="btn btn-light" onclick="{editTag}" if={!opts.val.archived}><i class="far fa-edit"></i></button>
     <input class="btn btn-light" type="button" value="X" onClick={opts.remove} />
     <a href="{opts.val.href}">{opts.val.name}</a>|
-    <span>{opts.val.deadline}</span>
+    <span>{opts.val.deadline}</span><br>
+    <span>Project Manager:{opts.val.projectManager}</span>
 
     <script>
         editTag(){
@@ -920,6 +922,7 @@
             $("#editTagModalDeadline").datepicker();
             $('#editTagModalDeadline').datepicker("setDate", new Date(opts.val.deadline));
             $("#editTagModalHref").val(opts.val.href);
+            $("#editTagModalProjectManager").val(opts.val.projectManager);
             currentUsedItem = opts.index;
             $("#editTagModal").modal();
         }
