@@ -76,7 +76,7 @@
                     <tr each={ item in globalInfo.items } if={item.visible && (!item.hidden || opts.showHidden)}>
                         <td style="text-align: center">
                             {item.id}<br>
-                             <input type="button" class="btn btn-success btn-block" value="Show" onclick="{()=> setHiddenStatus(item, false)}"  if={item.hidden}/>
+                             <input type="button" class="btn btn-success btn-block" value="Unhide" onclick="{()=> setHiddenStatus(item, false)}"  if={item.hidden}/>
                             <input type="button" class="btn btn-primary btn-block" value="Hide" onclick="{()=> setHiddenStatus(item, true)}"  if={!item.hidden}/><br>
                             <input type="button" class="btn btn-outline-danger btn-block" value="Delete" onclick="{()=> deleteItem(item)}" /></td>
                         <td>
