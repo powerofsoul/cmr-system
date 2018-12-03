@@ -96,7 +96,7 @@
                                 value={item.vendor.contactName} />
                             <input class="form-control" onChange="{updateValue(item.vendor, 'email')}" placeholder="Email"
                                 value={item.vendor.email} />
-                            <button class="btn {btn-success: item.vendor.name.replace(/\s/g,'') != '' && item.vendor.email.replace(/\s/g,'') != '' && item.vendor.contactName.replace(/\s/g,'') != '' && item.tags.length != undefined } full-width" onClick="{() => onboardUser(item)}">Onboard user</button>
+                            <button class="btn {btn-success: item.vendor.name.replace(/\s/g,'') != '' && item.vendor.email.replace(/\s/g,'') != '' && item.vendor.phone.replace(/\s/g,'') != '' && item.tag  != undefined } full-width" onClick="{() => onboardUser(item)}">Onboard user</button>
                         </td> 
                         <td style="width:300px">
                             <input class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'date')}" ref="mostRecentCall"
@@ -161,8 +161,13 @@
                             }
 
                             onboardUser(item){
-                                if(item.vendor.name.replace(/\s/g,"") == "" || item.vendor.email.replace(/\s/g,"") == "" || item.vendor.contactName.replace(/\s/g,"") == "" || item.tags.length == 0){
+                                if(item.vendor.name.replace(/\s/g,"") == "" || item.vendor.email.replace(/\s/g,"") == "" || item.vendor.phone.replace(/\s/g,"") == "" || item.tag == undefined){
                                     alert("Be sure to complete vendor name, contact name, email and also be sure you got a tag associated with the project");
+                                    return;
+                                }
+                                var tag = getTag(item.tag);
+                                if("emailDescription" in tag == false || ("emailDescription" in tag && tag.emailDescription.replace(/\s/g,"") == "" )){
+                                    alert(`Email description for ${getTag(item.tag).name} is missing`);
                                     return;
                                 }
                                 var data = {
@@ -178,6 +183,11 @@
                                 });
                             }
                             addCall(item){
+                                var lastCall = item.calls[item.calls.length-1];
+                                if(lastCall.date == "" || lastCall.note == ""){
+                                    alert("You need at the date and note to move this call");
+                                    return;
+                                }
                                 item.calls.push({ date: "", time: "", note: "" });
                                 this.update();
                                 saveItems();
@@ -477,6 +487,7 @@
             <tr>
                 <th scope="col">Action</th>
                 <th scope="col">Project Tag</th>
+                <th scope="col">Project email description</th>
                 <th scope="col">Bids</th>
                 <th scope="col">Intending to bid</th>
             </tr>
@@ -491,6 +502,10 @@
                     <span>{tag.deadline}</span><br>
                     <span>Project Manager:{tag.projectManager}</span>
                 </td>
+                <td>
+                    <textarea class="form-control" onChanged="{updateValue(tag, 'emailDescription')}" placeholder="Very brief description">{tag.emailDescription}</textarea><br>
+                     <b>"Hi, we just spokea about ______ project"
+                    </td>
                 <td>
                     <a>{countBids(tag)}</a>
                     <ul class="list-group list-group-flush" style="max-height: 150px; overflow-y: scroll;">
@@ -962,8 +977,8 @@
 
 <callColumn>
     <ul class="list-group list-group-flush" style="max-height: 150px; overflow-y: scroll;">
-        <li class="list-group-item" each={call, index in opts.calls}>
-            <call val="{call}" if={index !=opts.calls.length-1} remove="{()=>remove(call)}" />
+        <li class="list-group-item" each={call, index in opts.calls.slice().reverse()}>
+            <call val="{call}" if={index != 0} remove="{()=>remove(call)}" />
         </li>
     </ul>
 
