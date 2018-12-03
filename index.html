@@ -55,6 +55,17 @@
         return Math.max(...globalInfo.items.map(e => e.id));
     }
 
+
+    function mapTagsProperty(property){
+        var result = [];
+        for (var k in globalInfo.tags){
+            if (property in globalInfo.tags[k]) {
+                result.push(globalInfo.tags[k][property]);
+            }
+        }
+
+        return result;
+    }
 </script>
 
 <crmTable showHidden="false"></crmTable>

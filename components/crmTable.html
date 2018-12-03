@@ -29,7 +29,7 @@
                     Project tag: <input class="form-control" ref="tags" id="tagFilter" placeholder="Tag Name" />
                 </div>
                 <div class="side-menu-row">
-                    Project Manager(tbi): <input class="form-control" ref="tags" id="projectManagerFilter" placeholder="Project Manager" />
+                    Project Manager: <input class="form-control" ref="projectManager" id="projectManagerFilter" placeholder="Project Manager" />
                 </div>
                 <div class="side-menu-row">
                     Ending Before: <input class="form-control" ref="date" id="deadlineFilter" placeholder="Date">
@@ -211,7 +211,8 @@
                                     var tag = $("#tagFilter").val();
                                     if (tag != "") {
                                         globalInfo.items.forEach(el => {
-                                            if (el.tags.find(t => getTag(t).name == tag) != undefined)
+                                            var globalTag = getTag(el.tag);
+                                            if (globalTag != undefined && globalTag.name == tag)
                                                 el.visible = true;
                                             else
                                                 el.visible = false;
@@ -220,11 +221,21 @@
                                 } else if (by == "deadline") {
                                     var deadline = $("#deadlineFilter").val();
                                     globalInfo.items.forEach(el => {
-                                        if (el.tags.find(t => new Date(getTag(t).deadline).getTime() <= new Date(deadline).getTime()) != undefined)
+                                        if (new Date(getTag(el.tag).deadline).getTime() <= new Date(deadline).getTime())
                                             el.visible = true;
                                         else
                                             el.visible = false;
                                     })
+                                } else if(by == "projectManager"){
+                                    var projectManager = $("#projectManagerFilter").val();
+                                    if(projectManager!= "")
+                                        globalInfo.items.forEach(el => {
+                                                var globalTag = getTag(el.tag);
+                                                if (globalTag != undefined && getTag(el.tag).projectManager == projectManager)
+                                                    el.visible = true;
+                                                else
+                                                    el.visible = false;
+                                        })
                                 }
 
                                 this.update();
@@ -236,6 +247,7 @@
                                 });
                                 $(this.refs.date).val("");
                                 $(this.refs.tags).val("");
+                                $(this.refs.projectManager).val("");
                                 this.update();
                             }
 
@@ -281,22 +293,37 @@
                             this.on("mount", () => {
                                 $(this.refs.tags).on('keyup', (e) => this.filter('tag'));
                                 $(this.refs.date).on('change', (e) => this.filter('deadline'));
+                                $(this.refs.projectManager).on('change', (e) => this.filter('projectManager'));
+
+                                $(this.refs.mostRecentCall).datepicker({
+                                    onSelect: function (data) {
+                                        $(this).get(0).dispatchEvent(new Event('change'));
+                                    }
+                                });
+
+
                                 $(this.refs.tags).autocomplete({
-                                    source: globalInfo.tags,
+                                    source: mapTagsProperty('name'),
                                     minLength: 0,
                                     select: function (a, b) {
                                         $(this).val(b.item.value);
                                         $(this).keyup();
                                     }
                                 }).focus(function () {
-                                    $(this).keyup();
+                                    $(this).change();
                                     $(this).autocomplete('search', $(this).val())
                                 });
 
-                                $(this.refs.mostRecentCall).datepicker({
-                                    onSelect: function (data) {
-                                        $(this).get(0).dispatchEvent(new Event('change'));
+                                $(this.refs.projectManager).autocomplete({
+                                    source: mapTagsProperty('projectManager'),
+                                    minLength: 0,
+                                    select: function (a, b) {
+                                        $(this).val(b.item.value);
+                                        $(this).change();
                                     }
+                                }).focus(function () {
+                                    $(this).change();
+                                    $(this).autocomplete('search', $(this).val())
                                 });
 
                                 $(this.refs.date).datepicker({
@@ -328,7 +355,11 @@
                             })
                             this.on("update", () => {
                                 $(this.refs.tags).autocomplete({
-                                    source: getTagsName()
+                                    source: mapTagsProperty('name')
+                                });
+
+                                $(this.refs.projectManager).autocomplete({
+                                    source: mapTagsProperty('projectManager')
                                 });
 
                                 $(this.refs.mostRecentCall).datepicker({
