@@ -170,15 +170,19 @@
                                     alert(`Email description for ${getTag(item.tag).name} is missing`);
                                     return;
                                 }
+
                                 var data = {
                                     email: item.vendor.email,
-                                    projects: getTag(item.tag),
+                                    project: getTag(item.tag).href,
+                                    deadline: getTag(item.tag).deadline,
                                     full_name: item.vendor.contactName,
                                     company_name: item.vendor.name,
                                     phone: item.vendor.phone,
+                                    project_manager:tag.projectManager,
+                                    description:tag.emailDescription
                                 }
 
-                                $.get("https://188.24.227.230/wp-json/crm/add-user", data, (result) =>{
+                                $.get("/wp-json/crm/add-user", data, (result) =>{
                                     alert(result);
                                 });
                             }
@@ -503,7 +507,7 @@
                     <span>Project Manager:{tag.projectManager}</span>
                 </td>
                 <td>
-                    <textarea class="form-control" onChanged="{updateValue(tag, 'emailDescription')}" placeholder="Very brief description">{tag.emailDescription}</textarea><br>
+                    <textarea class="form-control" onChange="{updateValue(tag, 'emailDescription')}" placeholder="Very brief description">{tag.emailDescription}</textarea><br>
                      <b>"Hi, we just spokea about ______ project"
                     </td>
                 <td>
