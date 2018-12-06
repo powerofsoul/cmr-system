@@ -38,7 +38,7 @@ th, td{
 }
 
 .side-menu{
-    width:15%;
+    width:17%;
     margin:20px;
     height:100%;
     background-color:white;
@@ -71,4 +71,27 @@ body{
 
 .full-width button{
     margin-top:10px;
+}
+
+textarea{
+    margin-top: 5px;
+}
+
+.table{
+    background-color:white;
+}
+
+.icon{
+    width:40px;
+    height:40px;
+    margin:1px;
+}
+
+.side-menu-section{
+    margin-bottom:30px;
+}
+
+.item-id{
+    position:absolute;
+    bottom:0;
 }
