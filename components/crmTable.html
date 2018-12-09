@@ -16,6 +16,7 @@
                 </div>
         </div>
     </div>
+    <!--CRM VIEW-->
     <div class="crm-view" if="{globalView == 'CRM'}">
         <div class="side-menu">
             <div class="container">
@@ -27,14 +28,14 @@
                         Project tag: <input class="form-control" ref="tags" id="tagFilter" placeholder="Tag Name" />
                     </div>
                     <div class="side-menu-row">
-                        Project Manager: <input class="form-control" ref="projectManager" id="projectManagerFilter" placeholder="Project Manager" />
+                        Project Manager:<input class="form-control" ref="projectManager" id="projectManagerFilter" placeholder="Project Manager" />
                     </div>
                     <div class="side-menu-row">
                         Ending Before: <input class="form-control" ref="date" id="deadlineFilter" placeholder="Date">
                     </div>
                     <div class="side-menu-row">
-                        <span>Show only vendors needing follow up</span>
                         <input id="filterFollowUp" type="checkbox" onClick={filterFollowUp} />
+                        <span>Show only vendors needing follow up</span>
                     </div>
                     <div class="side-menu-row">
                         <input type="button" class="btn btn-light" value="Clear filters" onClick="{clearFilter}" />
@@ -54,16 +55,16 @@
                     </div>
                     <div class="side-menu-row" style="text-align:left">
                         <button type="button" class="btn btn-light" onClick="{addEntry}">Add entry</button>
-                        <button type="button" class="btn btn-light" data-toggle="modal" data-target="#addEntriesModal">Add
-                            multiple
-                            entries
+                    </div>
+                    <div class="side-menu-rown">
+                        <button type="button" class="btn btn-light" data-toggle="modal" data-target="#addEntriesModal">Add multiple
                         </button>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="table view-content">
-            <table class="full-width">
+        <div id="mainTableContainer" class="table table-container">
+            <table id="mainTable" class="full-width">
                 <thead>
                     <tr>
                         <th scope="col">ID</th>
@@ -79,17 +80,19 @@
                     <tr each={ item in globalInfo.items } if={item.visible && (!item.hidden || opts.showHidden)}>
                         <td style="text-align: center; position:relative;">
                              <input type="button" class="btn btn-success btn-block" value="Unhide" onclick="{()=> setHiddenStatus(item, false)}"  if={item.hidden}/>
-                            <input type="button" class="btn btn-primary btn-block" value="Hide" onclick="{()=> setHiddenStatus(item, true)}"  if={!item.hidden}/><br>
+                            <input type="button" class="btn btn-primary btn-block" value="Hide" onclick="{()=> setHiddenStatus(item, true)}"  if={!item.hidden}/>
                             <input type="button" class="btn btn-outline-danger btn-block" value="Delete" onclick="{()=> deleteItem(item)}" />
+                            <br>
+                            <div>
+                                <span class="dot" style="background-color:gray;width:25px;height:25px;" if="{item.status.reviewing=='on'}"></span>
+                                <span class="dot" style="background-color:yellow;width:25px;height:25px;" if="{item.status.intendsToBid=='on'}"></span>
+                                <span class="dot" style="background-color:green;width:25px;height:25px;" if="{item.status.bidded=='on'}"></span>
+                                <span class="dot" style="background-color:red;width:25px;height:25px;" if="{item.status.notBidding=='on'}"></span>
+                            </div>
                             <div class="item-id" >{item.id}</div>
                             </td>
                         <td>
                             <tagInput  item={item} />
-                            <br>
-                            <span class="dot" style="background-color:gray;width:25px;height:25px;" if="{item.status.reviewing=='on'}"></span>
-                            <span class="dot" style="background-color:yellow;width:25px;height:25px;" if="{item.status.intendsToBid=='on'}"></span>
-                            <span class="dot" style="background-color:green;width:25px;height:25px;" if="{item.status.bidded=='on'}"></span>
-                            <span class="dot" style="background-color:red;width:25px;height:25px;" if="{item.status.notBidding=='on'}"></span>
                         </td>
                         <td style="width:300">
                             <input class="form-control" onChange="{updateValue(item.vendor, 'name')}" ref="vendorName"
@@ -102,7 +105,7 @@
                                 value={item.vendor.email} readonly="{item.boarded}" />
                             <button class="btn {btn-success: item.vendor.name.replace(/\s/g,'') != '' && item.vendor.email.replace(/\s/g,'') != '' && item.vendor.phone.replace(/\s/g,'') != '' && item.tag  != undefined } full-width" onClick="{() => onboardUser(item)}" if={item.boarded == undefined || item.boarded == false} readonly="{item.boarded}" >Onboard user</button>
 
-                            <button class="btn" if={item.boarded == true}>Already on board</button>
+                            <button class="btn full-width" if={item.boarded == true}>Already on board</button>
                         </td> 
                         <td style="width:300px">
                             <input class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'date')}" ref="mostRecentCall"
@@ -206,7 +209,9 @@
 
                                 $.get("/wp-json/crm/add-user", data, (result) =>{
                                     alert(result);
-                                    item.boarded = true;
+                                    item.boarded = true;         
+                                    saveItems();
+                                    this.update();
                                 });
                             }
                             addCall(item){
@@ -326,6 +331,9 @@
                                 globalInfo.items.push(defaultItem);
                                 saveItems();
                                 this.update();
+
+                                //scroll to bottom
+                                $("#mainTableContainer").scrollTop($("#mainTableContainer")[0].scrollHeight);
                             }
                             this.on("mount", () => {
                                 $(this.refs.tags).on('keyup', (e) => this.filter('tag'));
@@ -509,6 +517,8 @@
             </table>
         </div>
     </div>
+    <!--END CRM VIEW-->
+    <!--Overview VIEW-->
     <table class="table" if="{globalView == 'Overview'}">
         <thead>
             <tr>
@@ -527,11 +537,12 @@
                 <td>
                     <a href="{tag.href}">{tag.name}</a>|
                     <span>{tag.deadline}</span><br>
-                    <span>Project Manager:{tag.projectManager}</span>
+                    <p>Project Manager: {tag.projectManager}</p>
+                    
                 </td>
                 <td>
                     <textarea class="form-control" onChange="{updateValue(tag, 'emailDescription')}" placeholder="Very brief description">{tag.emailDescription}</textarea><br>
-                     <b>"Hi, we just spoke about ______ project"
+                     <b>"Hi, we just spoke about the ______ project"
                     </td>
                 <td>
                     <a>{countBids(tag)}</a>
@@ -623,7 +634,8 @@
 
 
     </table>
-
+    <!--END OVERVIEW VIEW-->
+    <!--ARCHIVE VIEW-->
     <table class="table" if="{globalView == 'Archive'}">
             <thead>
                     <tr>
@@ -642,7 +654,7 @@
                         <td>
                             <a href="{tag.href}">{info.tag.name}</a>|
                             <span>{info.tag.deadline}</span><br>
-                            <span>Project Manager:{info.tag.projectManager}</span>
+                            <p>Project Manager: {info.tag.projectManager}</p>
                         </td>
                         <td>
                             <center>{info.bids.length}</center>
@@ -674,6 +686,8 @@
                     </script>
                 </tbody>
     </table>
+    <!--END ARCHIVE VIEW-->
+    <!--ARCHIVEDTAG VIEW-->
     <div if="{globalView == 'ArchivedTag'}">
         <button type="button" onclick="{()=>changeView('Archive')}" class="btn btn-primary">&lt;-Back to Archive List</button>
         <table class="table" >
@@ -740,6 +754,7 @@
                     </tbody>
         </table>
     </div>
+    <!--END ARCHIVED TAG-->
     <div class="modal" id="addEntriesModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -806,10 +821,10 @@
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
+                                   <h5 class="modal-title">Edit</h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
-                                    <h5 class="modal-title">Save Changes</h5>
                                 </div>
                                 <div class="modal-body">
                                     <input id="editTagModalName" class="form-control" placeholder="Project Name">
@@ -818,9 +833,9 @@
                                     <input id="editTagModalProjectManager" class="form-control" placeholder="Project Manager">
                                 </div>
                                 <div class="modal-footer">
-                                    <button id="submit" type="button" data-dismiss="modal" class="btn btn-primary"
-                                        onClick={editTag}>Edit</button>
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                                    <button id="submit" type="button" data-dismiss="modal" class="btn btn-success"
+                                        onClick={editTag}>Save changes</button>
                                 </div>
                             </div>
                         </div>
@@ -980,7 +995,7 @@
     <br>
     <a href="{opts.val.href}">{opts.val.name}</a>|
     <span>{opts.val.deadline}|</span>
-    <span>Project Manager:{opts.val.projectManager}</span>
+    <p>Project Manager: {opts.val.projectManager}</p>
 
     <script>
         editTag(){
@@ -996,7 +1011,7 @@
 </tag>
 
 <callColumn>
-    <ul class="list-group list-group-flush" style="max-height: 150px; overflow-y: scroll;">
+    <ul class="list-group list-group-flush" style="max-height: 200px; overflow-y: scroll;">
         <li class="list-group-item" each={call, index in opts.calls.slice().reverse()}>
             <call val="{call}" if={index != 0} remove="{()=>remove(call)}" />
         </li>
