@@ -43,9 +43,12 @@ th, td{
     margin:20px;
     height:100%;
     background-color:white;
-    overflow:auto;
+    overflow-y:auto;
 }
 
+thead{
+    background-color:white;
+}
 .table-container{
     margin:20px;
     height:100%;
@@ -100,4 +103,9 @@ textarea{
 
 ul .list-group-item{
     border:0;
+}
+
+/* 2.25rem + 4px hardcoded from boostrap v4 */
+textarea{
+    height:calc(2* (2.25rem + 4px)) !important;
 }

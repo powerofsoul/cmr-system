@@ -116,7 +116,7 @@
                                 placeholder="Note" value={item.calls[item.calls.length - 1].note} />
                             <button class="btn {btn-success:  item.calls[item.calls.length-1].date != '' && item.calls[item.calls.length-1].note != ''  } full-width" onClick="{() => addCall(item)}">Move to previous call</button>
                         </td>
-                        <td>
+                        <td style="width:100px">
                             <center>
                                 <input onClick="{updateValue(item, 'needsFollowUp')}" type="checkbox" checked="{item.needsFollowUp}">
                             </center>
@@ -383,20 +383,7 @@
                                         $(this).get(0).dispatchEvent(new Event('change'));
                                     }
                                 });
-                                $("td:nth-child(2),td:nth-child(3), td:nth-child(4)")
-                                    .css({
-                                        position: "relative"
-                                    })
-                                    .prepend("<div class='resizer'></div>")
-                                    .resizable({
-                                        resizeHeight: false,
-                                        handleSelector: "",
-                                        onDragStart: function (e, $el, opt) {
-                                            if (!$(e.target).hasClass("resizer"))
-                                                return false;
-                                            return true;
-                                        }
-                                    });
+
                             })
                             this.on("update", () => {
                                 $(this.refs.tags).autocomplete({
@@ -418,20 +405,14 @@
                                         $(this).get(0).dispatchEvent(new Event('change'));
                                     }
                                 });
-                                $("td:nth-child(2),td:nth-child(3), td:nth-child(4)")
-                                    .css({
-                                        position: "relative"
-                                    })
-                                    .prepend("<div class='resizer'></div>")
-                                    .resizable({
-                                        resizeHeight: false,
-                                        handleSelector: "",
-                                        onDragStart: function (e, $el, opt) {
-                                            if (!$(e.target).hasClass("resizer"))
-                                                return false;
-                                            return true;
-                                        }
-                                    });
+
+
+                                //hack find a better way without setTimeout
+                                //I need this because if we use floatThread before riot is rendering the page then we lose
+                                //proper width on each columns
+                                setTimeout(function() {
+                                    $('#mainTable').floatThead();
+                                }.bind(this), 1)
                             })
                             tick() {
                                 $.post("utils.php", { requestType: "lastModified", token: new Date().getTime() }, (data) => {
@@ -466,20 +447,6 @@
                                                     $(this).get(0).dispatchEvent(new Event('change'));
                                                 }
                                             });
-                                            $("td:nth-child(2),td:nth-child(3), td:nth-child(4)")
-                                                .css({
-                                                    position: "relative"
-                                                })
-                                                .prepend("<div class='resizer'></div>")
-                                                .resizable({
-                                                    resizeHeight: false,
-                                                    handleSelector: "",
-                                                    onDragStart: function (e, $el, opt) {
-                                                        if (!$(e.target).hasClass("resizer"))
-                                                            return false;
-                                                        return true;
-                                                    }
-                                                });
                                         });
                                         lastModified = modifiedDate;
                                     }
@@ -495,7 +462,8 @@
 
                             loadView(){
                                 switch (globalView) {
-                                    case "CRM":
+                                    case "CRM":                                 
+                                        break;
                                     case "Overview":
                                         this.clearFilter();
                                         break;
@@ -1011,7 +979,7 @@
 </tag>
 
 <callColumn>
-    <ul class="list-group list-group-flush" style="max-height: 200px; overflow-y: scroll;">
+    <ul class="list-group list-group-flush" style="max-height: 215px; overflow-y: auto;">
         <li class="list-group-item" each={call, index in opts.calls.slice().reverse()}>
             <call val="{call}" if={index != 0} remove="{()=>remove(call)}" />
         </li>
