@@ -62,6 +62,7 @@ thead{
 
 body{
     background-color:rgb(235, 235, 235);
+    overflow:hidden;
 }
 
 .side-menu-row{

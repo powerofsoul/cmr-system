@@ -77,7 +77,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr each={ item in globalInfo.items } if={item.visible && (!item.hidden || opts.showHidden)}>
+                    <tr each={ item in globalInfo.items } if={item.visible && (!item.hidden || opts.showHidden)} ref="item{item.id}">
                         <td style="text-align: center; position:relative;">
                              <input type="button" class="btn btn-success btn-block" value="Unhide" onclick="{()=> setHiddenStatus(item, false)}"  if={item.hidden}/>
                             <input type="button" class="btn btn-primary btn-block" value="Hide" onclick="{()=> setHiddenStatus(item, true)}"  if={!item.hidden}/>
@@ -121,7 +121,7 @@
                                 <input onClick="{updateValue(item, 'needsFollowUp')}" type="checkbox" checked="{item.needsFollowUp}">
                             </center>
                         </td>
-                        <td style="text-align:left;min-width:200px">
+                        <td style="text-align:left;min-width:170px">
                             <div>
                                 <input name="{item.id}" onChange="{()=>updateStatus(item, 'reviewing')}" type="radio" checked="{item.status.reviewing}">
                                 Reviewing
@@ -195,11 +195,13 @@
                                     alert(`Email description for ${getTag(item.tag).name} is missing`);
                                     return;
                                 }
+                                
+                                var deadline = getTag(item.tag).deadline.match(/\d{1,2}\/\d{1,2}/)[0];
 
                                 var data = {
                                     email: item.vendor.email,
                                     project: getTag(item.tag).href,
-                                    deadline: getTag(item.tag).deadline,
+                                    deadline:  deadline,
                                     full_name: item.vendor.contactName,
                                     company_name: item.vendor.name,
                                     phone: item.vendor.phone,
@@ -207,11 +209,17 @@
                                     description:tag.emailDescription
                                 }
 
+                                $(this.refs["item"+item.id]).LoadingOverlay("show");
+
                                 $.get("/wp-json/crm/add-user", data, (result) =>{
                                     alert(result);
-                                    item.boarded = true;         
-                                    saveItems();
-                                    this.update();
+                                    if(result === true){
+                                        item.boarded = true;         
+                                        saveItems();
+                                        this.update();
+                                    }
+
+                                    $(this.refs["item"+item.id]).LoadingOverlay("hide");
                                 });
                             }
                             addCall(item){
