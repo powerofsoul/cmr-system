@@ -73,14 +73,8 @@
                         var archivedOn = new Date().toLocaleDateString("en-US");
 
                         archivedObjectPreview["id"] = tag;
-                        if (bids != undefined)
-                            archivedObjectPreview["bids"] = bids;
-                        else
-                            archivedObjectPreview["bids"] = []
-                        if (intendsToBid != undefined)
-                            archivedObjectPreview["intendsToBid"] = intendsToBid;
-                        else
-                            archivedObjectPreview["intendsToBid"] = [];
+                        archivedObjectPreview["bids"] = bids;
+                        archivedObjectPreview["intendsToBid"] = intendsToBid;
                         archivedObjectPreview["archivedOn"] = archivedOn;
 
                         var itemsToBeRemoved = [];
@@ -106,7 +100,6 @@
 
                         saveItems();
                         this.update();
-                        console.log(archivedObjectPreview);
                     }
                 </script>
             </tr>

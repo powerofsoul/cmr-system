@@ -197,50 +197,12 @@
                             saveItems();
                             this.update();
                         }
+
+                        this.on("mount", () => {   
+                            globalUpdate = this.update;
+                        });
                     </script>
         </div>
-        <script>
-                changeView(selectedView){
-                    this.loadView();
-                    globalView = selectedView;
-                }
-
-                loadView(){
-                    switch (globalView) {
-                        case "CRM":                                 
-                            break;
-                        case "Overview":
-                            this.clearFilter();
-                            break;
-                        case "Archive":
-                            this.loadArchive(this.update);
-                            break;
-                    }
-                }
-                //TO DO update as paramater is tricky.. this should work without it
-                loadArchive(update) {
-                    var update = this.update;
-                    $.post("utils.php", { requestType: "read", file: "archive.json", token: new Date().getTime() }, function (data) {
-                        archiveInfo = JSON.parse(data);
-                        update();
-                    });
-                }
-
-                clearFilter(){
-                globalInfo.items.forEach(element => {
-                    element.visible = true;
-                });
-                $(this.refs.date).val("");
-                $(this.refs.tags).val("");
-                $(this.refs.projectManager).val("");
-                $('#filterFollowUp').prop('checked', false);
-                this.update();
-            }
-
-            getLastModified(){
-                return lastModified.toLocaleDateString("en-US") + " " + lastModified.toLocaleTimeString();
-            }
-        </script>
     </div>
 </crmTable>
 

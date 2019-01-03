@@ -349,6 +349,15 @@
                                 }
                             });
 
+
+                            globalInfo.items.forEach(element => {
+                                element.visible = true;
+                            });
+                            $(this.refs.date).val("");
+                            $(this.refs.tags).val("");
+                            $(this.refs.projectManager).val("");
+                            $('#filterFollowUp').prop('checked', false);
+                            this.update();
                         })
                         this.on("update", () => {
                             $(this.refs.tags).autocomplete({

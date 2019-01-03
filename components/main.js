@@ -1,9 +1,11 @@
 globalInfo = { tags: {}, items: [] }
 globalView = 'CRM';
 archiveInfo = [];
-archivedTag = {href:""};
+archivedTag = {href:"", items:[]};
 //TO-DO find alternative to this global used id
 lastModified = new Date(0);
+
+globalUpdate = ()=>{};
 
 function saveItems() {
     $.post("utils.php", { requestType: "write", records: JSON.stringify(globalInfo), token: new Date().getTime() }, (data) => {
@@ -61,4 +63,21 @@ function updateValue(a, b){
         saveItems();
     }
     this.update();
+}
+
+function changeView(selectedView){
+    globalView = selectedView;
+    globalUpdate();
+}
+
+function getLastModified(){
+    return lastModified.toLocaleDateString("en-US") + " " + lastModified.toLocaleTimeString();
+}
+
+function viewCalls(id){
+    changeView("ArchivedTag");
+    $.post("utils.php", { requestType: "read", file: `archive\\${id}.json`, token: new Date().getTime() }, function (data) {
+        archivedTag = JSON.parse(data);
+        globalUpdate();
+    });         
 }

@@ -1,52 +1,51 @@
 <archiveView>
     <table class="table">
         <thead>
-                <tr>
-                    <th scope="col">Action</th>
-                    <th scope="col">Project Tag</th>
-                    <th scope="col">Bids</th>
-                    <th scope="col">Intending to bid</th>
-                    <th scope="col">Archived on</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr each={info in archiveInfo}>
-                    <td>
-                        <button type="button" class="btn btn-dark" onClick="{()=> viewCalls(info.id)}">View all calls</button>
-                    </td>
-                    <td>
-                        <a href="{tag.href}">{info.tag.name}</a>|
-                        <span>{info.tag.deadline}</span><br>
-                        <p>Project Manager: {info.tag.projectManager}</p>
-                    </td>
-                    <td>
-                        <center>{info.bids.length}</center>
-                        <ul class="list-group list-group-flush" style="max-height: 150px; overflow-y: scroll;">
-                            <li class="list-group-item" each={val in info.bids}>
-                                <input class="form-control" value="{val}" readonly>
-                            </li>
-                        </ul>
-                    </td>
-                    <td>
-                        <center>{info.intendsToBid.length}</center>
-                        <ul class="list-group list-group-flush" style="max-height: 150px; overflow-y: scroll;">
-                            <li class="list-group-item" each={val in info.intendsToBid}>
-                                <input class="form-control" value="{val}" readonly>
-                            </li>
-                        </ul>
-                    </td>
-                    <td>{info.archivedOn}</td>
-                </tr>
-                <script>
-                    viewCalls(id){
-                        var updateFunction = this.update;
-                        $.post("utils.php", { requestType: "read", file: `archive\\${id}.json`, token: new Date().getTime() }, function (data) {
-                            archivedTag = JSON.parse(data);
-                            updateFunction();
-                            globalView = "ArchivedTag";
-                        });         
-                    }
-                </script>
-            </tbody>
+            <tr>
+                <th scope="col">Action</th>
+                <th scope="col">Project Tag</th>
+                <th scope="col">Bids</th>
+                <th scope="col">Intending to bid</th>
+                <th scope="col">Archived on</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr each={info in archiveInfo}>
+                <td>
+                    <button type="button" class="btn btn-dark" onClick="{()=> viewCalls(info.id)}">View all calls</button>
+                </td>
+                <td>
+                    <a href="{info.tag.href}">{info.tag.name}</a>|
+                    <span>{info.tag.deadline}</span><br>
+                    <p>Project Manager: {info.tag.projectManager}</p>
+                </td>
+                <td>
+                    <center>{info.bids.length}</center>
+                    <ul class="list-group list-group-flush" style="max-height: 150px; overflow-y: scroll;">
+                        <li class="list-group-item" each={val in info.bids}>
+                            <input class="form-control" value="{val}" readonly>
+                        </li>
+                    </ul>
+                </td>
+                <td>
+                    <center>0</center>
+                    <ul class="list-group list-group-flush" style="max-height: 150px; overflow-y: scroll;">
+                        <li class="list-group-item" each={val in info.intendsToBid}>
+                            <input class="form-control" value="{val}" readonly>
+                        </li>
+                    </ul>
+                </td>
+                <td>{info.archivedOn}</td>
+            </tr>
+            <script>
+                this.on("mount", () => {   
+                    let update = this.update;            
+                    $.post("utils.php", { requestType: "read", file: "archive.json", token: new Date().getTime() }, function (data) {
+                        archiveInfo = JSON.parse(data);
+                        update();
+                    });
+                });
+            </script>
+        </tbody>
     </table>
 </archiveView>
