@@ -1,5 +1,5 @@
 //global variables
-globalInfo = { tags: {}, items: [] }
+globalInfo = { managers:[], tags: {}, items: [] }
 globalView = 'CRM';
 globalUpdate = ()=>{};
 
@@ -62,9 +62,9 @@ function updateValue(a, b){
         } else {
             a[b] = event.target.value.trim();
         }
+        globalUpdate();
         saveItems();
     }
-    this.update();
 }
 
 function changeView(selectedView){

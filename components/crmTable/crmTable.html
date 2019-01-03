@@ -20,7 +20,7 @@
     <overviewView if="{globalView == 'Overview'}" />
     <archiveView if="{globalView == 'Archive'}" />
     <archivedTagView if="{globalView == 'ArchivedTag'}" />
-    <managersView if="{globalView == 'Managers'}" />
+    <managersView managers="{globalInfo.managers}" if="{globalView == 'Managers'}" />
 
     <div class="modal" id="addEntriesModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
@@ -314,14 +314,6 @@
                 }
             });
         });
-
-        updateValue(a, b){
-            return function (event, c) {
-                a[b] = event.target.value.trim();
-                this.update();
-                saveItems();
-            }
-        }
     </script>
 </call>
 

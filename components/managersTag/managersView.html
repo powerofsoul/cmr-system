@@ -1,3 +1,38 @@
 <managersView>
-    <p>Managers View<p>
+    <button class="btn btn-success" onClick={addNew}>Add new</button>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Action</th>
+                <th scope="col">Preview Image</th>
+                <th scope="col">Information</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr each={manager, index in opts.managers}>
+                <td>
+                    <button type="button" class="btn btn-danger" onClick="{() => remove(index)}">Delete</button>
+                </td>
+                <td>
+                    <img type="button" src="{manager.imageUrl}" wdith="15px" height="150px" />
+                </td>
+                <td>
+                    <input class="form-control" placeHolder="Name" onChange="{updateValue(manager, 'name')}" value="{manager.name}">
+                    <input class="form-control" placeHolder="Phone number" onChange="{updateValue(manager, 'phone')}" value="{manager.phone}">
+                    <input class="form-control" placeHolder="Headshot Url" onChange="{updateValue(manager, 'imageUrl')}" value="{manager.imageUrl}">
+                </td>
+            </tr>
+            <script>
+                 addNew(){
+                     opts.managers.push({name:"", phone:"", imageUrl:""})
+                     saveItems();
+                 }
+
+                 remove(index){
+                     opts.managers.splice(index, 1);
+                     saveItems();
+                 }
+            </script>
+        </tbody>
+    </table>
 </managersView>

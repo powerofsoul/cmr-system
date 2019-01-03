@@ -395,6 +395,8 @@
                                     $.post("utils.php", { requestType: "read", file: "records.json", token: new Date().getTime() }, (data) => {
                                         updatedInfo = JSON.parse(data);
                                         globalInfo.tags = updatedInfo.tags;
+                                        globalInfo.managers = updatedInfo.managers;
+
                                         if(globalInfo.items.length == 0) updatedInfo.items.forEach(x=> x.visible = true);
                                         updatedItems = updatedInfo.items;
                                         var items = globalInfo.items;
@@ -413,7 +415,7 @@
                                             }
                                         }
                                         console.log("Received changes")
-                                        this.update();
+                                        globalUpdate();
 
                                         //Dirty trick to trigger datepicker after rendering of page
                                         $(this.refs.mostRecentCall).datepicker({
