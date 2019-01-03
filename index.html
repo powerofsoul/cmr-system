@@ -8,67 +8,18 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/floatthead/2.1.2/jquery.floatThead.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.6/dist/loadingoverlay.min.js
 "></script>
-<script src="components/crmTable.html" type="riot/tag"></script>
 
 <script type="text/javascript" src="https://rawgit.com/riot/riot/master/riot%2Bcompiler.min.js"></script>
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css">
 <link rel="stylesheet" href="styles.css">
 
+<script src="components/crmTable/crmTable.html" type="riot/tag"></script>
+<script src='components/crmView/crmView.html' type="riot/tag"></script>
+<script src='components/overviewView/overviewView.html' type="riot/tag"></script>
+<script src='components/archiveView/archiveView.html' type="riot/tag"></script>
+<script src='components/archivedTagView/archivedTagView.html' type="riot/tag"></script>
 
-<script>
-    globalInfo = { tags: {}, items: [] }
-    globalView = 'CRM';
-    archiveInfo = [];
-    archivedTag = {};
-    //TO-DO find alternative to this global used id
-    lastModified = new Date(0);
-
-    function saveItems() {
-        $.post("utils.php", { requestType: "write", records: JSON.stringify(globalInfo), token: new Date().getTime() }, (data) => {
-            console.log(data);
-        });
-    }
-
-    function getTag(i) {
-        return globalInfo.tags[i];
-    }
-
-    function getTagWithName(name) {
-        for (key in globalInfo.tags)
-            if (globalInfo.tags[key].name == name)
-                return globalInfo.tags[key];
-
-        return undefined;
-    }
-
-    function getTagsName(){
-        var names = []
-        for (key in globalInfo.tags)
-            names.push(globalInfo.tags[key].name);
-        return names;
-    }
-
-    function onlyUnique(value, index, self) {
-        return self.indexOf(value) === index;
-    }
-
-    function getLastId() {
-        if (globalInfo.items.length == 0) return 0;
-        return Math.max(...globalInfo.items.map(e => e.id));
-    }
-
-
-    function mapTagsProperty(property){
-        var result = [];
-        for (var k in globalInfo.tags){
-            if (property in globalInfo.tags[k]) {
-                result.push(globalInfo.tags[k][property]);
-            }
-        }
-
-        return result;
-    }
-</script>
+<script type="text/javascript" src="components/main.js"></script>
 
 <crmTable showHidden="false"></crmTable>
 

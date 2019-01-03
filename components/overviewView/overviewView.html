@@ -1,0 +1,115 @@
+<overviewView>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Action</th>
+                <th scope="col">Project Tag</th>
+                <th scope="col">Project email description</th>
+                <th scope="col">Bids</th>
+                <th scope="col">Intending to bid</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr each={tag, key in globalInfo.tags} if="{!tag.archived}">
+                <td style="width:150px;">
+                    <button type="button" class="btn btn-dark" onclick="{()=>archiveTag(key)}">Archive</button>
+                </td>
+                <td>
+                    <a href="{tag.href}">{tag.name}</a>|
+                    <span>{tag.deadline}</span><br>
+                    <p>Project Manager: {tag.projectManager}</p>
+                    
+                </td>
+                <td>
+                    <textarea class="form-control" onChange="{updateValue(tag, 'emailDescription')}" placeholder="Very brief description">{tag.emailDescription}</textarea><br>
+                        <b>"Hi, we just spoke about the ______ project"
+                    </td>
+                <td>
+                    <a>{countBids(tag)}</a>
+                    <ul class="list-group list-group-flush" style="max-height: 150px; overflow-y: scroll;">
+                        <li class="list-group-item" each={vendor in getBids(tag)}>
+                            <input class="form-control" value="{vendor.name}" readonly>
+                        </li>
+                    </ul>
+                </td>
+                <td>
+                    <a>{countIntentions(tag)}</a>
+
+                    <ul class="list-group list-group-flush" style="max-height: 150px; overflow-y: scroll;">
+                        <li class="list-group-item" each={vendor in getIntentions(tag)}>
+                            <input class="form-control" value="{vendor.name}" readonly>
+                        </li>
+                    </ul>
+                </td>
+
+                <script>
+                    countBids(tag){            
+                        return globalInfo.items.filter(x => JSON.stringify(getTag(x.tag)) === JSON.stringify(tag) && 'bidded' in x.status).length;
+                    }
+                    getBids(tag){
+                        return globalInfo.items.filter(x => JSON.stringify(getTag(x.tag)) === JSON.stringify(tag) && 'bidded' in x.status).map(x => x.vendor);
+                    }
+                    countIntentions(tag){
+                        return globalInfo.items.filter(x => JSON.stringify(getTag(x.tag)) === JSON.stringify(tag) && 'intendsToBid' in x.status).length;
+                    }
+                    getIntentions(tag){
+                        return globalInfo.items.filter(x => JSON.stringify(getTag(x.tag)) === JSON.stringify(tag) && 'intendsToBid' in x.status).map(x => x.vendor);
+                    }
+
+                    archiveTag(tag){
+                        var tagName = globalInfo.tags[tag].name;
+                        var answer = confirm(`Are you sure that you want to archive ${tagName} ?`)
+                        if (!answer) return;
+
+                        globalInfo.tags[tag].archived = true;
+
+                        var archivedObjectPreview = {};
+                        archivedObjectPreview["tag"] = globalInfo.tags[tag];
+                        var archivedItems = { items: globalInfo.items.filter(x => x.tag == tag) }
+                        archivedItems.tag = globalInfo.tags[tag];
+
+                        var bids = archivedItems.items.filter(x => "bidded" in x.status).map(x => x.vendor.name);
+                        var intendsToBid = archivedItems.items.filter(x => "intendsToBid" in x.status).map(x => x.vendor.name);
+                        var archivedOn = new Date().toLocaleDateString("en-US");
+
+                        archivedObjectPreview["id"] = tag;
+                        if (bids != undefined)
+                            archivedObjectPreview["bids"] = bids;
+                        else
+                            archivedObjectPreview["bids"] = []
+                        if (intendsToBid != undefined)
+                            archivedObjectPreview["intendsToBid"] = intendsToBid;
+                        else
+                            archivedObjectPreview["intendsToBid"] = [];
+                        archivedObjectPreview["archivedOn"] = archivedOn;
+
+                        var itemsToBeRemoved = [];
+
+                        for (var i = 0; i < globalInfo.items.length; i++) {
+                            var currentItem = globalInfo.items[i];
+                            if (currentItem.tag != tag) continue;
+                            itemsToBeRemoved.push(i);
+                        }
+
+                        delete globalInfo.tags[tag];
+                        itemsToBeRemoved.sort().reverse();
+
+                        console.log(itemsToBeRemoved);
+                        itemsToBeRemoved.forEach(e => {
+                            globalInfo.items.splice(e, 1);
+                        });
+
+                        $.post("utils.php", { requestType: "archiveTag", previewTag: archivedObjectPreview, items: archivedItems, id: tag },
+                            (data) => {
+                                console.log(data);
+                            });
+
+                        saveItems();
+                        this.update();
+                        console.log(archivedObjectPreview);
+                    }
+                </script>
+            </tr>
+        </tbody>
+    </table>
+</overviewView>

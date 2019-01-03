@@ -1,0 +1,365 @@
+
+<crmTable>
+    <div style="background-color:#f4f4f4;">
+        <div class="container-full header">
+            <div class="row">
+                <div class="col-xs-2">
+                     <b>Last updated:</b>
+                     <br>
+                      {getLastModified()}
+                </div>
+                <div class="col m-auto">
+                    <b>Viewing:</b>
+                    <br>
+                    <button class="btn {btn-primary: globalView=='CRM'}" onClick="{()=> changeView('CRM')}">CRM</button>
+                    <button class="btn {btn-primary: globalView=='Overview'}" onClick="{()=> changeView('Overview')}">Overview</button>
+                    <button class="btn {btn-primary: globalView=='Archive'}" onClick="{()=> changeView('Archive')}">Archive</button>
+                </div>
+        </div>
+    </div>
+    
+    <crmView if="{globalView == 'CRM'}" />
+    <overviewView if="{globalView == 'Overview'}" />
+    <archiveView if="{globalView == 'Archive'}" />
+    <archivedTagView if="{globalView == 'ArchivedTag'}" />
+
+    <div class="modal" id="addEntriesModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add multiple entries</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Fields:
+                    <select id="fields">
+                        <option value="vendor.name">Vendor Name</option>
+                        <option value="vendor.phone">Vendor Phone Number</option>
+                        <option value="vendor.contactName">Vendor Contact Name</option>
+                        <option value="vendor.email">Vendor Email</option>
+                        <option value="call0.date">Call0 Date</option>
+                        <option value="call0.time">Call0 Time</option>
+                        <option value="call0.note">Call0 Note</option>
+                        <option value="note">Note</option>
+                    </select>
+                    <input type="button" value="Add" onClick="{addField}" />
+                    <ul>
+                        <li each={field in this.selectedEntryFields}>
+                            {field}
+                            <input type="button" class="btn btn-light" value="X" onClick="{()=> removeField(field)}" />
+                        </li>
+                    </ul>
+                    Values:
+                    <textarea class="form-control full-width" id="inputFields"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal" onClick="{import}">Add</button>
+                        <button type="button" class="btn" data-dismiss="modal">Cancel</button>
+                    </div>
+                    </div>
+                    </div>
+                    </div>
+
+                    <div id="addTagModal" class="modal" tabindex="-1" role="dialog">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Add</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <input id="addTagModalName" class="form-control" placeholder="Project Name">
+                                    <input id="addTagModalDeadline" class="form-control" placeholder="Deadline">
+                                    <input id="addTagModalHref" class="form-control" placeholder="HREF">
+                                    <input id="addTagModalProjectManager" class="form-control" placeholder="Project Manager">
+                                </div>
+                                <div class="modal-footer">
+                                    <button id="submit" type="button" class="btn btn-primary" onClick={createTag}>Create</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="editTagModal" class="modal" tabindex="-1" role="dialog">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                   <h5 class="modal-title">Edit</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <input id="editTagModalName" class="form-control" placeholder="Project Name">
+                                    <input id="editTagModalDeadline" class="form-control" placeholder="Deadline">
+                                    <input id="editTagModalHref" class="form-control" placeholder="HREF">
+                                    <input id="editTagModalProjectManager" class="form-control" placeholder="Project Manager">
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                                    <button id="submit" type="button" data-dismiss="modal" class="btn btn-success"
+                                        onClick={editTag}>Save changes</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                        this.selectedEntryFields = [];
+
+                        addField(){
+                            var selectedField = $("#fields").val();
+                            if (this.selectedEntryFields.indexOf(selectedField) == -1)
+                                this.selectedEntryFields.push(selectedField);
+                        }
+
+                        removeField(field){
+                            this.selectedEntryFields.pop(field);
+                            this.update();
+                        }
+
+                        import(){
+                            var input = $("#inputFields").val();
+                            input = input.split("\n").map(i => i.trim("	 ").split("\t")).filter(i => i.length != 0 || i.every(e => e == ""));
+
+                            input.forEach(e => {
+                                var defaultItem = {
+                                    id: getLastId() + 1,
+                                    tags: [],
+                                    deadline: "",
+                                    vendor: {
+                                        name: "",
+                                        phone: "",
+                                        contactName: "",
+                                        email: ""
+                                    },
+                                    call0: {
+                                        date: "",
+                                        time: "",
+                                        note: ""
+                                    },
+                                    bidded: false,
+                                    intendsToBid: false,
+                                    needsFollowUp: false,
+                                    calls: [
+                                        { date: "", time: "", note: "" },
+                                    ],
+                                    note: "",
+                                    visible: true
+                                };
+                                for (var i = 0; i < this.selectedEntryFields.length; i++) {
+                                    var p = this.selectedEntryFields[i].split(".")[0];
+                                    var p2 = this.selectedEntryFields[i].split(".")[1];
+                                    defaultItem[p][p2] = e[i];
+                                }
+                                defaultItem.id = getLastId() + 1;
+                                globalInfo.items.push(defaultItem);
+
+                            });
+                            saveItems();
+                            this.update();
+                        }
+                        createTag(){
+                            var id = new Date().getTime().toString();
+                            var name = $("#addTagModalName").val();
+                            var deadline = $("#addTagModalDeadline").val();
+                            var href = $("#addTagModalHref").val();
+                            var projectManager = $("#addTagModalProjectManager").val();
+
+                            var archived = false;
+                            if (href.indexOf("http://") != 0) href = "http://" + href;
+
+                            if (getTagWithName(name) != undefined) {
+                                alert(`Tag with name ${name} already exists`);
+                                return;
+                            }
+
+                            globalInfo.tags[id] = { name: name, deadline: deadline, href: href, projectManager: projectManager, archived: archived };
+                            var item = globalInfo.items.find(x => x.id == currentUsedItem);
+                            item.tag = id;
+                            
+                            $('#addTagModal').modal('toggle');
+
+                            saveItems();
+                            this.update();
+                        }
+                        editTag(){
+                            var name = $("#editTagModalName").val();
+                            var deadline = $("#editTagModalDeadline").val();
+                            var href = $("#editTagModalHref").val();
+                            var projectManager = $("#editTagModalProjectManager").val();
+                            globalInfo.tags[currentUsedItem] = { name: name, deadline: deadline, href: href, projectManager: projectManager };
+                            saveItems();
+                            this.update();
+                        }
+                    </script>
+        </div>
+        <script>
+                changeView(selectedView){
+                    this.loadView();
+                    globalView = selectedView;
+                }
+
+                loadView(){
+                    switch (globalView) {
+                        case "CRM":                                 
+                            break;
+                        case "Overview":
+                            this.clearFilter();
+                            break;
+                        case "Archive":
+                            this.loadArchive(this.update);
+                            break;
+                    }
+                }
+                //TO DO update as paramater is tricky.. this should work without it
+                loadArchive(update) {
+                    var update = this.update;
+                    $.post("utils.php", { requestType: "read", file: "archive.json", token: new Date().getTime() }, function (data) {
+                        archiveInfo = JSON.parse(data);
+                        update();
+                    });
+                }
+
+                clearFilter(){
+                globalInfo.items.forEach(element => {
+                    element.visible = true;
+                });
+                $(this.refs.date).val("");
+                $(this.refs.tags).val("");
+                $(this.refs.projectManager).val("");
+                $('#filterFollowUp').prop('checked', false);
+                this.update();
+            }
+
+            getLastModified(){
+                return lastModified.toLocaleDateString("en-US") + " " + lastModified.toLocaleTimeString();
+            }
+        </script>
+    </div>
+</crmTable>
+
+<tagInput>
+    <div class="dropdown" style="text-align:center" if={opts.item.tag  == undefined}>
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
+            Add tag
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" >
+            <a class="dropdown-item" onClick="{createTag}">Create New +</a>
+            <a class="dropdown-item" each={tag, key in globalInfo.tags} onclick="{()=> add(key)}" if="{!tag.archived}">{tag.name}</a>
+        </div>
+    </div>
+    <tag val={getTag(opts.item.tag)} index={opts.item.tag} remove={remove} if={opts.item.tag != undefined}/>
+
+    <script>
+        add(key){
+            var emailDescription = getTag(key).emailDescription;
+            if(emailDescription == undefined || emailDescription.length < 3){
+                debugger
+                alert("You cannot add this project tag until you create an email description for the project in the Overview screen.");
+                return;
+            }
+            opts.item.tag = key;
+            saveItems();
+            this.update();
+        }
+        createTag(){
+            $("#addTagModalName").val('');
+            $("#addTagModalDeadline").datepicker();
+            $("#addTagModalDeadline").val('');
+            $("#addTagModalHref").val('');
+            currentUsedItem = this.opts.item.id;
+            $("#addTagModal").modal();
+        }
+
+        remove(){
+            opts.item.tag = undefined;
+            saveItems();
+            this.update();
+        }
+
+        this.on("mount", () => {
+            $(this.refs.inputTagName).autocomplete({
+                source: globalInfo.tags
+            });
+
+            $(this.refs.inputTagDeadLine).datepicker();
+        })
+
+        this.on("update", () => {
+            $(this.refs.inputTagName).autocomplete({
+                source: globalInfo.tags
+            });
+            $(this.refs.inputTagDeadLine).datepicker();
+        })
+    </script>
+</tagInput>
+
+<tag>
+    <button class="btn btn-outline-info icon" onclick="{editTag}" if={!opts.val.archived}><i class="far fa-edit"></i></button>
+    <button class="btn btn-outline-danger icon" type="button" onClick={opts.remove} >X</button>
+    <br>
+    <a href="{opts.val.href}">{opts.val.name}</a>|
+    <span>{opts.val.deadline}|</span>
+    <p>Project Manager: {opts.val.projectManager}</p>
+
+    <script>
+        editTag(){
+            $("#editTagModalName").val(opts.val.name);
+            $("#editTagModalDeadline").datepicker();
+            $('#editTagModalDeadline').datepicker("setDate", new Date(opts.val.deadline));
+            $("#editTagModalHref").val(opts.val.href);
+            $("#editTagModalProjectManager").val(opts.val.projectManager);
+            currentUsedItem = opts.index;
+            $("#editTagModal").modal();
+        }
+    </script>
+</tag>
+
+<callColumn>
+    <ul class="list-group list-group-flush" style="max-height: 215px; overflow-y: auto;">
+        <li class="list-group-item" each={call, index in opts.calls.slice().reverse()}>
+            <call val="{call}" if={index != 0} remove="{()=>remove(call)}" />
+        </li>
+    </ul>
+
+    <script>
+        remove(call){
+            var index = opts.calls.findIndex(x => x.date == call.date && x.time == call.time && x.note == call.note);
+            if (index > -1)
+                opts.calls.splice(index, 1);
+            this.update();
+            saveItems();
+        }
+    </script>
+</callColumn>
+
+<call>
+    <input class="form-control" onChange="{updateValue(opts.val, 'date')}" ref="date" placeholder="Date" value="{this.opts.val.date}" />
+    <input class="form-control" onChange="{updateValue(opts.val, 'time')}" type="time" placeholder="Time" value="{this.opts.val.time}" />
+    <textarea class="form-control" onChange="{updateValue(opts.val, 'note')}" placeholder="Note" value="{this.opts.val.note}" />
+    <input type="button" class="btn btn-danger" value="Delete Call" onclick="{opts.remove}" />
+    <script>
+        this.on('mount', function () {
+            $(this.refs.date).datepicker({
+                onSelect: function (data) {
+                    $(this).get(0).dispatchEvent(new Event('change'));
+                }
+            });
+        });
+
+        updateValue(a, b){
+            return function (event, c) {
+                a[b] = event.target.value.trim();
+                this.update();
+                saveItems();
+            }
+        }
+    </script>
+</call>

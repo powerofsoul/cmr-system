@@ -1,0 +1,68 @@
+<archivedTagView>
+    <div>
+        <button type="button" onclick="{()=>changeView('Archive')}" class="btn btn-primary">&lt;-Back to Archive List</button>
+        <table class="table" >
+            <thead>
+                    <tr>
+                        <th scope="col">Project Tag</th>
+                        <th scope="col">Vendor</th>
+                        <th scope="col">Most Recent Call</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Previous Calls</th>
+                    </tr>
+                </thead>
+                <tbody>    
+                    <tr each={item in archivedTag.items}>
+                        <td>
+                            <a href={archivedTag.tag.href}>{archivedTag.tag.name}</a>
+                            <a>|{archivedTag.tag.deadline}</a>
+                        </td>
+                        <td>
+                            <input class="form-control" value={item.vendor.name} readonly>
+                            <input class="form-control" value={item.vendor.phone} readonly>
+                            <input class="form-control" value={item.vendor.contactName} readonly>
+                            <input class="form-control" value={item.vendor.email} readonly>
+                        </td>
+                        <td>
+                            <input class="form-control" value={item.calls[item.calls.length - 1].date} disabled/>
+                            <input class="form-control" value={item.calls[item.calls.length - 1].time} disabled/>
+                            <input class="form-control" value={item.calls[item.calls.length - 1].note} disabled/>
+                        </td>
+                        <td>
+                            <div>
+                                <input name="archivedTagStatus {item.id}"  type="radio" checked="{item.status.reviewing}" disabled>
+                                <b>Reviewing</b>
+                                <span class="dot" style="background-color:gray"></span>
+                            </div>
+                            <div>
+                                <input name="archivedTagStatus {item.id}"  type="radio" checked="{item.status.intendsToBid}" disabled>
+                                <b>Intends to bid</b>
+                                <span class="dot" style="background-color:yellow"></span>
+                            </div>
+                            <div>
+                                <input name="archivedTagStatus {item.id}" type="radio" checked="{item.status.bidded}" disabled>
+                                <b>Bidded</b>
+                                <span class="dot" style="background-color:green"></span>
+                            </div>
+                            <div>
+                                <input name="archivedTagStatus {item.id}"  type="radio" checked="{item.status.notBidding}" disabled>
+                                <b>Not bidding</b>
+                                <span class="dot" style="background-color:red"></span>
+                            </div>
+                        </td>
+                        <td style="width:300px">
+                            <ul class="list-group list-group-flush" style="max-height: 150px; overflow-y: scroll;">
+                                <li class="list-group-item" each={call, index in item.calls}>
+                                    <div if={index !=item.calls.length-1}>
+                                        <input class="form-control" value="{call.date}" disabled/>
+                                        <input class="form-control" value="{call.time}" disabled/>
+                                        <textarea class="form-control" value="{call.note}" disabled/>  
+                                    </div>
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
+                </tbody>
+        </table>
+    </div>
+</archivedTagView>

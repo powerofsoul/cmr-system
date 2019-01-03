@@ -1,0 +1,427 @@
+<crmView class="crm-view">
+    <div class="side-menu">
+        <div class="container">
+            <div class="side-menu-section">
+                <div class="side-menu-row">
+                    <h4>Filter By</h4>
+                </div>
+                <div class="side-menu-row">
+                    Project tag: <input class="form-control" ref="tags" id="tagFilter" placeholder="Tag Name" />
+                </div>
+                <div class="side-menu-row">
+                    Project Manager:<input class="form-control" ref="projectManager" id="projectManagerFilter" placeholder="Project Manager" />
+                </div>
+                <div class="side-menu-row">
+                    Ending Before: <input class="form-control" ref="date" id="deadlineFilter" placeholder="Date">
+                </div>
+                <div class="side-menu-row">
+                    <input id="filterFollowUp" type="checkbox" onClick={filterFollowUp} />
+                    <span>Show only vendors needing follow up</span>
+                </div>
+                <div class="side-menu-row">
+                    <input type="button" class="btn btn-light" value="Clear filters" onClick="{clearFilter}" />
+                </div>
+            </div>
+            <div class="side-menu-section">
+                <div class="side-menu-row">
+                    <h4>Hidden rows</h4>
+                </div>
+                <div class="side-menu-row">
+                    <input type="checkbox" id="showHiddenCheckBox" onClick="{() => showHidden()}"> Show Hidden
+                </div>
+            </div>
+            <div class="side-menu-section">
+                <div class="side-menu-row">
+                    <h4>Add</h4>
+                </div>
+                <div class="side-menu-row" style="text-align:left">
+                    <button type="button" class="btn btn-light" onClick="{addEntry}">Add entry</button>
+                </div>
+                <div class="side-menu-rown">
+                    <button type="button" class="btn btn-light" data-toggle="modal" data-target="#addEntriesModal">Add multiple
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="mainTableContainer" class="table table-container">
+        <table id="mainTable" class="full-width">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Project Tag</th>
+                    <th scope="col">Vendor</th>
+                    <th scope="col">Most recent call</th>
+                    <th scope="col">Needs Follow Up</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Previous calls</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr each={ item in globalInfo.items } if={item.visible && (!item.hidden || opts.showHidden)} ref="item{item.id}">
+                    <td style="text-align: center; position:relative;">
+                            <input type="button" class="btn btn-success btn-block" value="Unhide" onclick="{()=> setHiddenStatus(item, false)}"  if={item.hidden}/>
+                        <input type="button" class="btn btn-primary btn-block" value="Hide" onclick="{()=> setHiddenStatus(item, true)}"  if={!item.hidden}/>
+                        <input type="button" class="btn btn-outline-danger btn-block" value="Delete" onclick="{()=> deleteItem(item)}" />
+                        <br>
+                        <div>
+                            <span class="dot" style="background-color:gray;width:25px;height:25px;" if="{item.status.reviewing=='on'}"></span>
+                            <span class="dot" style="background-color:yellow;width:25px;height:25px;" if="{item.status.intendsToBid=='on'}"></span>
+                            <span class="dot" style="background-color:green;width:25px;height:25px;" if="{item.status.bidded=='on'}"></span>
+                            <span class="dot" style="background-color:red;width:25px;height:25px;" if="{item.status.notBidding=='on'}"></span>
+                        </div>
+                        <div class="item-id" >{item.id}</div>
+                        </td>
+                    <td>
+                        <tagInput  item={item} />
+                    </td>
+                    <td style="width:300">
+                        <input class="form-control" onChange="{updateValue(item.vendor, 'name')}" ref="vendorName"
+                            placeholder="Vendor Name" value={item.vendor.name} readonly="{item.boarded}" />
+                        <input class="form-control" onChange="{updateValue(item.vendor, 'phone')}" ref="vendorPhone"
+                            placeholder="Phone number" value={item.vendor.phone} readonly="{item.boarded}"/>
+                        <input class="form-control" onChange="{updateValue(item.vendor, 'contactName')}" placeholder="Contact Name"
+                            value={item.vendor.contactName} readonly="{item.boarded}"  />
+                        <input class="form-control" onChange="{updateValue(item.vendor, 'email')}" placeholder="Email"
+                            value={item.vendor.email} readonly="{item.boarded}" />
+                        <button class="btn {btn-success: item.vendor.name.replace(/\s/g,'') != '' && item.vendor.email.replace(/\s/g,'') != '' && item.vendor.phone.replace(/\s/g,'') != '' && item.tag  != undefined } full-width" onClick="{() => onboardUser(item)}" if={item.boarded == undefined || item.boarded == false} readonly="{item.boarded}" >Onboard user</button>
+
+                        <button class="btn full-width" if={item.boarded == true}>Already on board</button>
+                    </td> 
+                    <td style="width:300px">
+                        <input class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'date')}" ref="mostRecentCall"
+                            placeholder="Date" value={item.calls[item.calls.length - 1].date} />
+                        <input class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'time')}"
+                            type="time" placeholder="Time" value={item.calls[item.calls.length - 1].time} />
+                        <textarea class="form-control" onChange="{updateValue(item.calls[item.calls.length - 1], 'note')}"
+                            placeholder="Note" value={item.calls[item.calls.length - 1].note} />
+                        <button class="btn {btn-success:  item.calls[item.calls.length-1].date != '' && item.calls[item.calls.length-1].note != ''  } full-width" onClick="{() => addCall(item)}">Move to previous call</button>
+                    </td>
+                    <td style="width:100px">
+                        <center>
+                            <input onClick="{updateValue(item, 'needsFollowUp')}" type="checkbox" checked="{item.needsFollowUp}">
+                        </center>
+                    </td>
+                    <td style="text-align:left;min-width:170px">
+                        <div>
+                            <input name="{item.id}" onChange="{()=>updateStatus(item, 'reviewing')}" type="radio" checked="{item.status.reviewing}">
+                            Reviewing
+                            <span class="dot" style="background-color:gray"></span>
+                        </div>
+                        <div>
+                            <input name="{item.id}"  onChange="{()=>updateStatus(item, 'intendsToBid')}" type="radio" checked="{item.status.intendsToBid}">
+                            Intends to bid
+                            <span class="dot" style="background-color:yellow"></span>
+                        </div>
+                        <div>
+                            <input name="{item.id}"  onChange="{()=>updateStatus(item, 'bidded')}" type="radio" checked="{item.status.bidded}">
+                            Bidded
+                            <span class="dot" style="background-color:green"></span>
+                        </div>
+                        <div>
+                            <input name="{item.id}"  onChange="{()=>updateStatus(item, 'notBidding')}" type="radio" checked="{item.status.notBidding}">
+                            Not bidding
+                            <span class="dot" style="background-color:red"></span>
+                        </div>
+                    </td>
+                    <td style="width:300px">
+                        <callColumn calls="{item.calls}" />
+                    </td>
+                    <script>
+                        updateStatus(item, status){
+                            item.status = {}
+                            item.status[status] = "on";
+                            saveItems();
+                            this.update();
+                        }
+
+                        onboardUser(item){
+                            if(item.vendor.name.length == 0){
+                                alert("Invalid vendor name");
+                                return;
+                            }
+                            
+                            if(!/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(item.vendor.email)){
+                                alert("Invalid vendor email");
+                                return;
+                            }
+
+                            if(!/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$/g.test(item.vendor.phone))
+                            {
+                                alert("Invalid vendor phone");
+                                return;
+                            }
+
+                            if(item.tag == undefined){
+                                alert("You need one tag in order to board");
+                                return;
+                            }
+                            var tag = getTag(item.tag);
+                            if("emailDescription" in tag == false || ("emailDescription" in tag && tag.emailDescription.replace(/\s/g,"") == "" )){
+                                alert(`Email description for ${getTag(item.tag).name} is missing`);
+                                return;
+                            }
+                            
+                            var deadline = getTag(item.tag).deadline.match(/\d{1,2}\/\d{1,2}/)[0];
+
+                            var data = {
+                                email: item.vendor.email,
+                                project: getTag(item.tag).href,
+                                deadline:  deadline,
+                                full_name: item.vendor.contactName,
+                                company_name: item.vendor.name,
+                                phone: item.vendor.phone,
+                                project_manager:tag.projectManager,
+                                description:tag.emailDescription
+                            }
+
+                            $(this.refs["item"+item.id]).LoadingOverlay("show");
+
+                            var url = "https://testsite.astorian.com/crm-api/";
+                            var params = Object.keys(data).map(key => key + '=' + data[key]).join('&');
+                            $.get("utils.php",{requestType:"onboard", url : url, params: params }, (result) =>{
+                                alert(result);
+                                if(result === true){
+                                    item.boarded = true;         
+                                    saveItems();
+                                    this.update();
+                                }
+
+                                $(this.refs["item"+item.id]).LoadingOverlay("hide");
+                            });
+                        }
+                        addCall(item){
+                            var lastCall = item.calls[item.calls.length-1];
+                            if(lastCall.date == "" || lastCall.note == ""){
+                                alert("You need at the date and note to move this call");
+                                return;
+                            }
+                            item.calls.push({ date: "", time: "", note: "" });
+                            this.update();
+                            saveItems();
+                        }
+                        setHiddenStatus(item, value){
+                            item.hidden = value;
+                            saveItems();
+                            this.update();
+                        }
+
+                        showHidden(){
+                            opts.showHidden = $("#showHiddenCheckBox").prop('checked');
+                            this.update();
+                        }
+
+                        deleteItem(item){
+                            var index = globalInfo.items.findIndex(x => x.id == item.id);
+                            if (index != -1) {
+                                globalInfo.items.splice(index, 1);
+                            }
+                            saveItems();
+                        }
+
+                        selectedTags = [];
+
+                        filter(by) {
+                            globalInfo.items.forEach(e => {
+                                e.visible = true;
+                            });
+                            if (by == "tag") {
+                                var tag = $("#tagFilter").val();
+                                if (tag != "") {
+                                    globalInfo.items.forEach(el => {
+                                        var globalTag = getTag(el.tag);
+                                        if (globalTag != undefined && globalTag.name == tag)
+                                            el.visible = true;
+                                        else
+                                            el.visible = false;
+                                    })
+                                }
+                            } else if (by == "deadline") {
+                                var deadline = $("#deadlineFilter").val();
+                                globalInfo.items.forEach(el => {
+                                    if (new Date(getTag(el.tag).deadline).getTime() <= new Date(deadline).getTime())
+                                        el.visible = true;
+                                    else
+                                        el.visible = false;
+                                })
+                            } else if(by == "projectManager"){
+                                var projectManager = $("#projectManagerFilter").val();
+                                if(projectManager!= "")
+                                    globalInfo.items.forEach(el => {
+                                            var globalTag = getTag(el.tag);
+                                            if (globalTag != undefined && getTag(el.tag).projectManager == projectManager)
+                                                el.visible = true;
+                                            else
+                                                el.visible = false;
+                                    })
+                            }
+
+                            this.update();
+                        }
+
+                        filterFollowUp(e){
+                            globalInfo.items.forEach(item => {
+                                if (e.target.checked == true && item.needsFollowUp == true)
+                                    item.visible = true;
+                                else if (e.target.checked == true && item.needsFollowUp == false)
+                                    item.visible = false;
+                                else
+                                    item.visible = true;
+                            });
+
+                            this.update;
+                        }
+                        addEntry(){
+                            var defaultItem = {
+                                id: getLastId(),
+                                tags: [],
+                                deadline: "",
+                                vendor: {
+                                    name: "",
+                                    phone: "",
+                                    contactName: "",
+                                    email: ""
+                                },
+                                needsFollowUp: false,
+                                status: {},
+                                calls: [
+                                    { date: "", time: "", note: "" },
+                                ],
+                                note: "",
+                                visible: true
+                            };
+
+                            if (JSON.stringify(globalInfo.items[globalInfo.items.length - 1]) === JSON.stringify(defaultItem)) return;
+                            else defaultItem.id++;
+                            globalInfo.items.push(defaultItem);
+                            saveItems();
+                            this.update();
+
+                            //scroll to bottom
+                            $("#mainTableContainer").scrollTop($("#mainTableContainer")[0].scrollHeight);
+                        }
+                        this.on("mount", () => {
+                            $(this.refs.tags).on('keyup', (e) => this.filter('tag'));
+                            $(this.refs.date).on('change', (e) => this.filter('deadline'));
+                            $(this.refs.projectManager).on('change', (e) => this.filter('projectManager'));
+
+                            $(this.refs.mostRecentCall).datepicker({
+                                onSelect: function (data) {
+                                    $(this).get(0).dispatchEvent(new Event('change'));
+                                }
+                            });
+
+
+                            $(this.refs.tags).autocomplete({
+                                source: mapTagsProperty('name'),
+                                minLength: 0,
+                                select: function (a, b) {
+                                    $(this).val(b.item.value);
+                                    $(this).keyup();
+                                }
+                            }).focus(function () {
+                                $(this).change();
+                                $(this).autocomplete('search', $(this).val())
+                            });
+
+                            $(this.refs.projectManager).autocomplete({
+                                source: mapTagsProperty('projectManager'),
+                                minLength: 0,
+                                select: function (a, b) {
+                                    $(this).val(b.item.value);
+                                    $(this).change();
+                                }
+                            }).focus(function () {
+                                $(this).change();
+                                $(this).autocomplete('search', $(this).val())
+                            });
+
+                            $(this.refs.date).datepicker({
+                                onSelect: function (data) {
+                                    $(this).val(data);
+                                    $(this).change();
+                                }
+                            });
+
+                            $(this.refs.mostRecentCall).datepicker({
+                                onSelect: function (data) {
+                                    $(this).get(0).dispatchEvent(new Event('change'));
+                                }
+                            });
+
+                        })
+                        this.on("update", () => {
+                            $(this.refs.tags).autocomplete({
+                                source: mapTagsProperty('name')
+                            });
+
+                            $(this.refs.projectManager).autocomplete({
+                                source: mapTagsProperty('projectManager')
+                            });
+
+                            $(this.refs.mostRecentCall).datepicker({
+                                onSelect: function (data) {
+                                    $(this).get(0).dispatchEvent(new Event('change'));
+                                }
+                            });
+
+                            $(this.refs.mostRecentCall).datepicker({
+                                onSelect: function (data) {
+                                    $(this).get(0).dispatchEvent(new Event('change'));
+                                }
+                            });
+
+
+                            //hack find a better way without setTimeout
+                            //I need this because if we use floatThread before riot is rendering the page then we lose
+                            //proper width on each columns
+                            setTimeout(function() {
+                                $('#mainTable').floatThead();
+                            }.bind(this), 1)
+                        })
+                        tick() {
+                            $.post("utils.php", { requestType: "lastModified", token: new Date().getTime() }, (data) => {
+                                modifiedDate = new Date(data);
+                                if (lastModified == undefined || !(modifiedDate.getTime() === lastModified.getTime())) {
+                                    $.post("utils.php", { requestType: "read", file: "records.json", token: new Date().getTime() }, (data) => {
+                                        updatedInfo = JSON.parse(data);
+                                        globalInfo.tags = updatedInfo.tags;
+                                        if(globalInfo.items.length == 0) updatedInfo.items.forEach(x=> x.visible = true);
+                                        updatedItems = updatedInfo.items;
+                                        var items = globalInfo.items;
+                                        for (var i = 0; i < updatedItems.length; i++) {
+                                            if (i >= items.length) {
+                                                items.push(updatedItems[i]);
+                                            } else {
+                                                while (updatedItems[i].id != items[i].id) {
+                                                    items.splice(i, 1);
+                                                }
+                                                var visibility = items[i].visible;
+                                                Object.keys(items[i]).forEach(function (key) {
+                                                    items[i][key] = updatedItems[i][key];
+                                                });
+                                                items[i].visible = visibility;
+                                            }
+                                        }
+                                        console.log("Received changes")
+                                        this.update();
+
+                                        //Dirty trick to trigger datepicker after rendering of page
+                                        $(this.refs.mostRecentCall).datepicker({
+                                            onSelect: function (data) {
+                                                $(this).get(0).dispatchEvent(new Event('change'));
+                                            }
+                                        });
+                                    });
+                                    lastModified = modifiedDate;
+                                }
+                            });
+
+                        }
+                        var timer = setInterval(this.tick, 100);
+                    </script>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</crmView>
