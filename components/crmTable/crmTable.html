@@ -1,4 +1,3 @@
-
 <crmTable>
     <div style="background-color:#f4f4f4;">
         <div class="container-full header">
@@ -11,10 +10,8 @@
                 <div class="col m-auto">
                     <b>Viewing:</b>
                     <br>
-                    <button class="btn {btn-primary: globalView=='CRM'}" onClick="{()=> changeView('CRM')}">CRM</button>
-                    <button class="btn {btn-primary: globalView=='Overview'}" onClick="{()=> changeView('Overview')}">Overview</button>
-                    <button class="btn {btn-primary: globalView=='Archive'}" onClick="{()=> changeView('Archive')}">Archive</button>
-                    <button class="btn {btn-primary: globalView=='Archive'}" onClick="{()=> changeView('Managers')}">Managers </button>
+                    
+                    <menuButton each={view in ["CRM", "Overview", "Archive", "Managers"]} view={view} />
                 </div>
         </div>
     </div>
@@ -327,3 +324,7 @@
         }
     </script>
 </call>
+
+<menuButton>
+    <button class="btn {btn-primary: globalView==this.opts.view}" style="margin-right:10" onClick="{()=> changeView(this.opts.view)}">{this.opts.view}</button>
+</menuButton>
