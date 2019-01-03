@@ -48,5 +48,9 @@ else if($requestType == "lastModified"){
     
     fwrite($archiveItemFile, json_encode($items));
     fclose($archiveItemFile);
-}
+    }else if($requestType = "onboard"){
+        $params = str_replace(" ","%20", $_REQUEST['params']);
+        $response = file_get_contents($_REQUEST['url'] . $params);
+        echo $response;
+    }
 ?>
