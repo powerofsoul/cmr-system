@@ -177,9 +177,8 @@
 
                             $(this.refs["item"+item.id]).LoadingOverlay("show");
 
-                            var url = "https://" + window.location.hostname + "/crm-api/";
-                            var params = Object.keys(data).map(key => key + '=' + data[key]).join('&');
-                            $.post("utils.php",{requestType:"onboard", url : url, params: params }, (result) =>{
+                            var url = "https://" + window.location.hostname + "/wp-json/crm/onboard";
+                            $.post(url, data, (result) =>{
                                 alert(result);
                                 if(result === true){
                                     item.boarded = true;         
