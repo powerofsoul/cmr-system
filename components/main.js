@@ -1,11 +1,13 @@
+//global variables
 globalInfo = { tags: {}, items: [] }
 globalView = 'CRM';
+globalUpdate = ()=>{};
+
 archiveInfo = [];
 archivedTag = {href:"", items:[]};
-//TO-DO find alternative to this global used id
 lastModified = new Date(0);
+//end of global variable
 
-globalUpdate = ()=>{};
 
 function saveItems() {
     $.post("utils.php", { requestType: "write", records: JSON.stringify(globalInfo), token: new Date().getTime() }, (data) => {
