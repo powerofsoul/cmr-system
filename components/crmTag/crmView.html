@@ -378,14 +378,6 @@
                                     $(this).get(0).dispatchEvent(new Event('change'));
                                 }
                             });
-
-
-                            //hack find a better way without setTimeout
-                            //I need this because if we use floatThread before riot is rendering the page then we lose
-                            //proper width on each columns
-                            setTimeout(function() {
-                                $('#mainTable').floatThead();
-                            }.bind(this), 1)
                         })
                         tick() {
                             $.post("utils.php", { requestType: "lastModified", token: new Date().getTime() }, (data) => {
@@ -422,6 +414,8 @@
                                                 $(this).get(0).dispatchEvent(new Event('change'));
                                             }
                                         });
+
+                                        $('#mainTable').floatThead();
                                     });
                                     lastModified = modifiedDate;
                                 }
