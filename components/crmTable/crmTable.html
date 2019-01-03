@@ -14,6 +14,7 @@
                     <button class="btn {btn-primary: globalView=='CRM'}" onClick="{()=> changeView('CRM')}">CRM</button>
                     <button class="btn {btn-primary: globalView=='Overview'}" onClick="{()=> changeView('Overview')}">Overview</button>
                     <button class="btn {btn-primary: globalView=='Archive'}" onClick="{()=> changeView('Archive')}">Archive</button>
+                    <button class="btn {btn-primary: globalView=='Archive'}" onClick="{()=> changeView('Managers')}">Managers </button>
                 </div>
         </div>
     </div>
@@ -22,6 +23,7 @@
     <overviewView if="{globalView == 'Overview'}" />
     <archiveView if="{globalView == 'Archive'}" />
     <archivedTagView if="{globalView == 'ArchivedTag'}" />
+    <managersView if="{globalView == 'Managers'}" />
 
     <div class="modal" id="addEntriesModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
