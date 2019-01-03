@@ -177,9 +177,9 @@
 
                             $(this.refs["item"+item.id]).LoadingOverlay("show");
 
-                            var url = "https://testsite.astorian.com/crm-api/";
+                            var url = "https://" + window.location.hostname + "/crm-api/";
                             var params = Object.keys(data).map(key => key + '=' + data[key]).join('&');
-                            $.get("utils.php",{requestType:"onboard", url : url, params: params }, (result) =>{
+                            $.post("utils.php",{requestType:"onboard", url : url, params: params }, (result) =>{
                                 alert(result);
                                 if(result === true){
                                     item.boarded = true;         
