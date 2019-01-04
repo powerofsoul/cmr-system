@@ -4,6 +4,7 @@
             <tr>
                 <th scope="col">Action</th>
                 <th scope="col">Project Tag</th>
+                <th scope="col">Project Manager</th>
                 <th scope="col">Project email description</th>
                 <th scope="col">Bids</th>
                 <th scope="col">Intending to bid</th>
@@ -17,8 +18,13 @@
                 <td>
                     <a href="{tag.href}">{tag.name}</a>|
                     <span>{tag.deadline}</span><br>
-                    <p>Project Manager: {tag.projectManager}</p>
-                    
+                </td>
+                <td>
+                    <select class="form-control" onChange={updateValue(tag, "projectManager")}>
+                        <option value="-1">Not selected</options>
+                        <option each={manager, index in globalInfo.managers} value="{index}" selected={index==tag.projectManager}>{manager.name}</options>
+                    </select>
+                    <img src="{globalInfo.managers[tag.projectManager].imageUrl}" class="project-manager-image"></img>
                 </td>
                 <td>
                     <textarea class="form-control" onChange="{updateValue(tag, 'emailDescription')}" placeholder="Very brief description">{tag.emailDescription}</textarea><br>
