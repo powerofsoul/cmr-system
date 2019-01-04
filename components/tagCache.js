@@ -68,3 +68,23 @@ function doAjaxRequest(action, data, success = ()=>{}){;
       
     });
 }
+
+function mapTagsProperty(property){
+    var result = [];
+    for (var k in tagCache){
+        if (property in tagCache[k]) {
+            result.push(tagCache[k][property]);
+        }
+    }
+
+    return result;
+}
+
+function getProjectManagerIdByName(name){
+    var projectId = -1;
+    globalInfo.managers.forEach((e, id) => {
+        if(e.name == name) projectId = id;
+    });
+
+    return projectId;
+}

@@ -247,10 +247,11 @@
                                 })
                             } else if(by == "projectManager"){
                                 var projectManager = $("#projectManagerFilter").val();
+                                var projectManagerId = getProjectManagerIdByName(projectManager);
                                 if(projectManager!= "")
                                     globalInfo.items.forEach(el => {
                                             var globalTag = getTag(el.tag);
-                                            if (globalTag != undefined && getTag(el.tag).projectManager == projectManager)
+                                            if (globalTag != undefined && getTag(el.tag).projectManager == projectManagerId)
                                                 el.visible = true;
                                             else
                                                 el.visible = false;
@@ -272,6 +273,18 @@
 
                             this.update;
                         }
+
+                        clearFilter(){
+                            globalInfo.items.forEach(element => {
+                                element.visible = true;
+                            });
+                            $(this.refs.date).val("");
+                            $(this.refs.tags).val("");
+                            $(this.refs.projectManager).val("");
+                            $('#filterFollowUp').prop('checked', false);
+                            this.update();
+                        }
+
                         addEntry(){
                             var defaultItem = {
                                 id: getLastId(),
@@ -336,6 +349,31 @@
                             this.update();
                         })
                         this.on("update", () => {
+                            $(this.refs.tags).autocomplete({
+                                source: mapTagsProperty('name'),
+                                minLength: 0,
+                                select: function (a, b) {
+                                    $(this).val(b.item.value);
+                                    $(this).keyup();
+                                }
+                            }).focus(function () {
+                                $(this).change();
+                                $(this).autocomplete('search', $(this).val())
+                            });
+
+                            $(this.refs.projectManager).autocomplete({
+                                source: globalInfo.managers.map(x=>x.name),
+                                minLength: 0,
+                                select: function (a, b) {
+                                    $(this).val(b.item.value);
+                                    $(this).keyup();
+                                }
+                            }).focus(function () {
+                                $(this).change();
+                                $(this).autocomplete('search', $(this).val())
+                            });
+
+
                             $(this.refs.mostRecentCall).datepicker({
                                 onSelect: function (data) {
                                     $(this).get(0).dispatchEvent(new Event('change'));
