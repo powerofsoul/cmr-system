@@ -77,39 +77,6 @@
             saveItems();
             this.update();
         }
-        createTag(){
-            var id = new Date().getTime().toString();
-            var name = $("#addTagModalName").val();
-            var deadline = $("#addTagModalDeadline").val();
-            var href = $("#addTagModalHref").val();
-            var projectManager = $("#addTagModalProjectManager").val();
-
-            var archived = false;
-            if (href.indexOf("http://") != 0) href = "http://" + href;
-
-            if (getTagWithName(name) != undefined) {
-                alert(`Tag with name ${name} already exists`);
-                return;
-            }
-
-            globalInfo.tags[id] = { name: name, deadline: deadline, href: href, projectManager: projectManager, archived: archived };
-            var item = globalInfo.items.find(x => x.id == currentUsedItem);
-            item.tag = id;
-            
-            $('#addTagModal').modal('toggle');
-
-            saveItems();
-            this.update();
-        }
-        editTag(){
-            var name = $("#editTagModalName").val();
-            var deadline = $("#editTagModalDeadline").val();
-            var href = $("#editTagModalHref").val();
-            var projectManager = $("#editTagModalProjectManager").val();
-            globalInfo.tags[currentUsedItem] = { name: name, deadline: deadline, href: href, projectManager: projectManager };
-            saveItems();
-            this.update();
-        }
 
         this.on("mount", () => {   
             globalUpdate = this.update;
@@ -124,7 +91,7 @@
             Add tag
         </button>
         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" >
-            <a class="dropdown-item" onClick="{createTag}">Create New +</a>
+            <a class="dropdown-item" onClick="{createTag}">Import tag +</a>
             <a class="dropdown-item" each={tag, key in globalInfo.tags} onclick="{()=> add(key)}" if="{!tag.archived}">{tag.name}</a>
         </div>
     </div>
@@ -179,7 +146,7 @@
     <br>
     <a href="{opts.val.href}">{opts.val.name}</a>|
     <span>{opts.val.deadline}|</span>
-    <p>Project Manager: {opts.val.projectManager}</p>
+    <p>Project Manager: {getProjectManager(opts.val.projectManager).name}</p>
 </tag>
 
 <callColumn>

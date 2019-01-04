@@ -83,3 +83,7 @@ function viewCalls(id){
         globalUpdate();
     });         
 }
+
+function getProjectManager(id){
+    return globalInfo.managers[id];
+}

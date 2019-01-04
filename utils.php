@@ -1,6 +1,9 @@
 <?php
-$requestType = $_POST["requestType"];
-if($requestType == "write"){
+$requestMethod = $_POST["requestType"];
+
+$requestMethod();
+
+function write(){
     $records = $_POST["records"];
     $recordsFile = fopen("records.json", "w") or die("Unable to open file!");
     
@@ -9,20 +12,26 @@ if($requestType == "write"){
 
     echo date('D M d Y H:i:s O', filemtime("records.json"));
 }
-else if($requestType == "read"){
+
+function read(){
     $file = fopen($_POST["file"], "r") or die("Unable to open file!");
     echo fread($file,filesize($_POST["file"]));
     fclose($file);
 }
-else if($requestType == "lastModified"){
+
+function lastModified(){
     if (file_exists("records.json")) {
         echo date('D M d Y H:i:s O', filemtime("records.json"));
     }
-}else if($requestType == "getTagHref"){
+}
+
+function getTagHref(){
     $tagFile = fopen("tags.json", "r") or die("Unable to open file!");
     $tagFileContent = fread($tagFile,filesize("tags.json"));
     echo $tagFileContent;
-}else if($requestType == "archiveTag"){
+}
+    
+function archiveTag(){
     $previewTag = $_POST["previewTag"];
     $items = $_POST["items"];
     $id = $_POST["id"];
@@ -48,5 +57,5 @@ else if($requestType == "lastModified"){
     
     fwrite($archiveItemFile, json_encode($items));
     fclose($archiveItemFile);
-    }
+}
 ?>
