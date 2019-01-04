@@ -63,16 +63,17 @@
                     }
 
                     archiveTag(tag){
-                        var tagName = globalInfo.tags[tag].name;
+                        var tag = tagCache[tag];
+                        var tagName = tag.name;
                         var answer = confirm(`Are you sure that you want to archive ${tagName} ?`)
                         if (!answer) return;
 
-                        globalInfo.tags[tag].archived = true;
+                        tag.archived = true;
 
                         var archivedObjectPreview = {};
-                        archivedObjectPreview["tag"] = globalInfo.tags[tag];
+                        archivedObjectPreview["tag"] = tag;
                         var archivedItems = { items: globalInfo.items.filter(x => x.tag == tag) }
-                        archivedItems.tag = globalInfo.tags[tag];
+                        archivedItems.tag = tag;
 
                         var bids = archivedItems.items.filter(x => "bidded" in x.status).map(x => x.vendor.name);
                         var intendsToBid = archivedItems.items.filter(x => "intendsToBid" in x.status).map(x => x.vendor.name);
