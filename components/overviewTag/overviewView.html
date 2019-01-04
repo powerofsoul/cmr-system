@@ -11,23 +11,23 @@
             </tr>
         </thead>
         <tbody>
-            <tr each={tag, key in globalInfo.tags} if="{!tag.archived}">
+            <tr each={tag, key in tagCache} if="{!tag.archived}">
                 <td style="width:150px;">
                     <button type="button" class="btn btn-dark" onclick="{()=>archiveTag(key)}">Archive</button>
                 </td>
-                <td>
+                <td style="max-width:200px;">
                     <a href="{tag.href}">{tag.name}</a>|
                     <span>{tag.deadline}</span><br>
                 </td>
                 <td>
-                    <select class="form-control" onChange={updateValue(tag, "projectManager")}>
+                    <select class="form-control" onChange={updateTag(tag, "projectManager")}>
                         <option value="-1">Not selected</options>
                         <option each={manager, index in globalInfo.managers} value="{index}" selected={index==tag.projectManager}>{manager.name}</options>
                     </select>
                     <img src="{globalInfo.managers[tag.projectManager].imageUrl}" class="project-manager-image"></img>
                 </td>
                 <td>
-                    <textarea class="form-control" onChange="{updateValue(tag, 'emailDescription')}" placeholder="Very brief description">{tag.emailDescription}</textarea><br>
+                    <textarea class="form-control" onChange="{updateTag(tag, 'emailDescription')}" placeholder="Very brief description">{tag.emailDescription}</textarea><br>
                         <b>"Hi, we just spoke about the ______ project"
                     </td>
                 <td>

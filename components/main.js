@@ -1,5 +1,5 @@
 //global variables
-globalInfo = { managers:[], tags: {}, items: [] }
+globalInfo = {tags: [], managers:[], items: [] }
 globalView = 'CRM';
 globalUpdate = ()=>{};
 
@@ -15,25 +15,6 @@ function saveItems() {
     });
 }
 
-function getTag(i) {
-    return globalInfo.tags[i];
-}
-
-function getTagWithName(name) {
-    for (key in globalInfo.tags)
-        if (globalInfo.tags[key].name == name)
-            return globalInfo.tags[key];
-
-    return undefined;
-}
-
-function getTagsName(){
-    var names = []
-    for (key in globalInfo.tags)
-        names.push(globalInfo.tags[key].name);
-    return names;
-}
-
 function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
 }
@@ -41,18 +22,6 @@ function onlyUnique(value, index, self) {
 function getLastId() {
     if (globalInfo.items.length == 0) return 0;
     return Math.max(...globalInfo.items.map(e => e.id));
-}
-
-
-function mapTagsProperty(property){
-    var result = [];
-    for (var k in globalInfo.tags){
-        if (property in globalInfo.tags[k]) {
-            result.push(globalInfo.tags[k][property]);
-        }
-    }
-
-    return result;
 }
 
 function updateValue(a, b){

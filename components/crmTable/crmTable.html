@@ -82,6 +82,27 @@
             globalUpdate = this.update;
         });
     </script>
+
+
+    <div id="importTagModal" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Import tag</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input id="importTagModalProjectUrl" class="form-control" placeholder="Project href">
+                </div>
+                <div class="modal-footer">
+                    <button id="submit" type="button" class="btn btn-primary" data-dismiss="modal" onClick="importTag($('#importTagModalProjectUrl').val())">Import</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </crmTable>
 
 <tagInput>
@@ -91,31 +112,25 @@
             Add tag
         </button>
         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" >
-            <a class="dropdown-item" onClick="{createTag}">Import tag +</a>
-            <a class="dropdown-item" each={tag, key in globalInfo.tags} onclick="{()=> add(key)}" if="{!tag.archived}">{tag.name}</a>
+            <a class="dropdown-item" onClick="{importTag}">Import tag +</a>
+            <a class="dropdown-item" each={tag in tagCache} onclick="{()=> add(tag)}" if="{!tag.archived}">{tag.name}</a>
         </div>
     </div>
     <tag val={getTag(opts.item.tag)} index={opts.item.tag} remove={remove} if={opts.item.tag != undefined}/>
 
     <script>
-        add(key){
-            var emailDescription = getTag(key).emailDescription;
+        add(tag){
+            var emailDescription = tag.emailDescription;
             if(emailDescription == undefined || emailDescription.length < 3){
-                debugger
                 alert("You cannot add this project tag until you create an email description for the project in the Overview screen.");
                 return;
             }
-            opts.item.tag = key;
+            opts.item.tag = tag.id;
             saveItems();
             this.update();
         }
-        createTag(){
-            $("#addTagModalName").val('');
-            $("#addTagModalDeadline").datepicker();
-            $("#addTagModalDeadline").val('');
-            $("#addTagModalHref").val('');
-            currentUsedItem = this.opts.item.id;
-            $("#addTagModal").modal();
+        importTag(){
+            $("#importTagModal").modal();
         }
 
         remove(){
@@ -186,3 +201,4 @@
 <menuButton>
     <button class="btn {btn-primary: globalView==this.opts.view}" style="margin-right:10" onClick="{()=> changeView(this.opts.view)}">{this.opts.view}</button>
 </menuButton>
+
