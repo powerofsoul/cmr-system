@@ -73,7 +73,7 @@
                         <div class="item-id" >{item.id}</div>
                         </td>
                     <td>
-                        <tagInput  item={item} />
+                        <tagInput  item={item} if={tagCache[item.tag] != undefined} />
                     </td>
                     <td style="width:300">
                         <input class="form-control" onChange="{updateValue(item.vendor, 'name')}" ref="vendorName"
