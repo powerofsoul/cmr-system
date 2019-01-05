@@ -27,12 +27,19 @@
                 </tr>
                 <script>
                     addNew(){
-                        opts.managers.unshift({name:"", phone:"", imageUrl:""})
+                        var uniqueID = new Date().getTime();
+                        opts.managers[uniqueID] ={
+                                 name:"", 
+                                 phone:"", 
+                                 imageUrl:""
+                             }
+                        ;
                         saveItems();
+                        $(".table-container").scrollTop($(".table-container")[0].scrollHeight);
                     }
 
                     remove(index){
-                        opts.managers.splice(index, 1);
+                        delete opts.managers[index]
                         saveItems();
                     }
                 </script>

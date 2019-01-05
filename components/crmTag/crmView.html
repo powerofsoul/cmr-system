@@ -312,7 +312,7 @@
                             this.update();
 
                             //scroll to bottom
-                            $("#mainTableContainer").scrollTop($("#mainTableContainer")[0].scrollHeight);
+                            $(".table-container").scrollTop($(".table-container")[0].scrollHeight);
                         }
                         this.on("mount", () => {
                             $(this.refs.tags).on('keyup', (e) => this.filter('tag'));
@@ -361,17 +361,7 @@
                                 $(this).autocomplete('search', $(this).val())
                             });
 
-                            $(this.refs.projectManager).autocomplete({
-                                source: globalInfo.managers.map(x=>x.name),
-                                minLength: 0,
-                                select: function (a, b) {
-                                    $(this).val(b.item.value);
-                                    $(this).keyup();
-                                }
-                            }).focus(function () {
-                                $(this).change();
-                                $(this).autocomplete('search', $(this).val())
-                            });
+                            
 
 
                             $(this.refs.mostRecentCall).datepicker({

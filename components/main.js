@@ -1,5 +1,5 @@
 //global variables
-globalInfo = {tags: [], managers:[], items: [] }
+globalInfo = {tags: [], managers:{}, items: [] }
 globalView = 'CRM';
 globalUpdate = ()=>{};
 
