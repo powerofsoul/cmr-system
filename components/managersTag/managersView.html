@@ -1,38 +1,42 @@
-<managersView>
-    <button class="btn btn-success" onClick={addNew}>Add new</button>
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">Action</th>
-                <th scope="col">Preview Image</th>
-                <th scope="col">Information</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr each={manager, index in opts.managers}>
-                <td>
-                    <button type="button" class="btn btn-danger" onClick="{() => remove(index)}">Delete</button>
-                </td>
-                <td>
-                    <img src="{manager.imageUrl}" class="project-manager-image" />
-                </td>
-                <td>
-                    <input class="form-control" placeHolder="Name" onChange="{updateValue(manager, 'name')}" value="{manager.name}">
-                    <input class="form-control" placeHolder="Phone number" onChange="{updateValue(manager, 'phone')}" value="{manager.phone}">
-                    <input class="form-control" placeHolder="Headshot Url" onChange="{updateValue(manager, 'imageUrl')}" value="{manager.imageUrl}">
-                </td>
-            </tr>
-            <script>
-                 addNew(){
-                     opts.managers.push({name:"", phone:"", imageUrl:""})
-                     saveItems();
-                 }
+<managersView class="crm-view">
+    <div class="table-container">
+        <table class="table full-width">
+            <thead>
+                <tr>
+                    <th scope="col">Action</th>
+                    <th scope="col">Preview Image</th>
+                    <th scope="col">Information</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="3"><button class="btn btn-success" onClick={addNew}>Add new</button></td>
+                </tr>
+                <tr each={manager, index in opts.managers}>
+                    <td>
+                        <button type="button" class="btn btn-danger" onClick="{() => remove(index)}">Delete</button>
+                    </td>
+                    <td>
+                        <img src="{manager.imageUrl}" class="project-manager-image" />
+                    </td>
+                    <td>
+                        <input class="form-control" placeHolder="Name" onChange="{updateValue(manager, 'name')}" value="{manager.name}">
+                        <input class="form-control" placeHolder="Phone number" onChange="{updateValue(manager, 'phone')}" value="{manager.phone}">
+                        <input class="form-control" placeHolder="Headshot Url" onChange="{updateValue(manager, 'imageUrl')}" value="{manager.imageUrl}">
+                    </td>
+                </tr>
+                <script>
+                    addNew(){
+                        opts.managers.unshift({name:"", phone:"", imageUrl:""})
+                        saveItems();
+                    }
 
-                 remove(index){
-                     opts.managers.splice(index, 1);
-                     saveItems();
-                 }
-            </script>
-        </tbody>
-    </table>
+                    remove(index){
+                        opts.managers.splice(index, 1);
+                        saveItems();
+                    }
+                </script>
+            </tbody>
+        </table>
+    </div>
 </managersView>

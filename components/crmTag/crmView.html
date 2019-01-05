@@ -44,8 +44,8 @@
             </div>
         </div>
     </div>
-    <div id="mainTableContainer" class="table table-container">
-        <table id="mainTable" class="full-width">
+    <div class="table-container full-width">
+        <table id="mainTable" class="table">
             <thead>
                 <tr>
                     <th scope="col">ID</th>
@@ -425,7 +425,7 @@
                                         });
                                         
                                         globalUpdate();
-                                        $('#mainTable').floatThead(); 
+                                        $('.table').floatThead(); 
                                     });
                                       
                                     lastModified = modifiedDate;

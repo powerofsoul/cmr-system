@@ -39,6 +39,7 @@ function updateValue(a, b){
 function changeView(selectedView){
     globalView = selectedView;
     globalUpdate();
+    $('.table').floatThead(); 
 }
 
 function getLastModified(){

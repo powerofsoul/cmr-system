@@ -1,5 +1,5 @@
 tagCache = {};
-var ajaxUrl = "https://astorian.local/wp-admin/admin-ajax.php";
+var ajaxUrl = "https://82.76.10.205/wp-admin/admin-ajax.php";
 
 function fillTagCache(){
   var success = (data) =>{
