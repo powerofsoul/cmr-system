@@ -106,7 +106,7 @@
 </crmTable>
 
 <tagInput>
-    <div class="dropdown" style="text-align:center">
+    <div class="dropdown" style="text-align:center" if={opts.item.tag  == undefined}>
         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
             aria-haspopup="true" aria-expanded="false">
             Add tag
@@ -116,7 +116,7 @@
             <a class="dropdown-item" each={tag in tagCache} onclick="{()=> add(tag)}" if="{!tag.archived}">{tag.name}</a>
         </div>
     </div>
-    <tag val={getTag(opts.item.tag)} index={opts.item.tag} remove={remove} />
+    <tag val={getTag(opts.item.tag)} index={opts.item.tag} remove={remove} if={opts.item.tag != undefined}/>
 
     <script>
         add(tag){
