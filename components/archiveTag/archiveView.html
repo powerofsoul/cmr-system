@@ -17,7 +17,7 @@
                 <td>
                     <a href="{info.tag.href}">{info.tag.name}</a>|
                     <span>{info.tag.deadline}</span><br>
-                    <p>Project Manager: {info.tag.projectManager}</p>
+                    <p>Project Manager: {getProjectManager(info.tag.projectManager).name}</p>
                 </td>
                 <td>
                     <center>{info.bids.length}</center>
